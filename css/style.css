@@ -48,6 +48,7 @@ body {
 
 #homeLink:hover, #merchandiseLink:hover, #podcastsLink:hover, #contactLink:hover, #createAccountLink:hover, #loginLink:hover {
     text-decoration: underline;
+    cursor: pointer;
 }
 
 #logoDiv {
@@ -82,7 +83,7 @@ body {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    position: fixed;
+    position:static;
     bottom: 0;
 }
 
@@ -93,4 +94,5 @@ body {
 
 #facebookIcon, #linkedIcon, #instagramIcon, #twitterIcon {
     padding: 1px 5px 1px 5px;
+    cursor: pointer;
 }
