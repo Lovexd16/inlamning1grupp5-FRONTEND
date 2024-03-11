@@ -39,7 +39,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function showFreePodcasts() {
         const freePodcastsDiv = document.createElement("div");
-        freePodcastsDiv.style.marginBottom = "3%";
         const freePodcastsHeaderDiv = document.createElement("div");
         freePodcastsHeaderDiv.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
         freePodcastsHeaderDiv.style.margin = "0 5px 0 5px";
