@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 audio.src = URL.createObjectURL(blob);
                 audio.style.maxWidth = "100%";
                 audio.controls = true;
+                audio.style.width = "98%";
 
                 const names = ["Origins", "Hip Hop", "Black Sabbath", "Reggae", "Elvis"];
 
@@ -94,6 +95,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function showMiddlecolumn() {
         const middleColumnDiv = document.createElement("div");
         middleColumnDiv.style.margin = "0 1% 0 1%";
+        middleColumnDiv.style.width = "48%";
         const middleColumnHeaderDiv = document.createElement("div");
         middleColumnHeaderDiv.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
         middleColumnHeaderDiv.style.textAlign = "center";
@@ -102,9 +104,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         middleColumnHeaderDiv.appendChild(middleColumnHeaderText);
         middleColumnDiv.appendChild(middleColumnHeaderDiv);
         middleColumnDiv.style.width = "50%";
-        contentDiv.appendChild(middleColumnDiv);
 
-        fetch ("http://localhost:8080/api/customer/stripe/get-single-product", {
+        await fetch ("http://localhost:8080/api/customer/stripe/get-single-product", {
             method: "GET",
             headers: {
                 productId: "prod_PgRBbMLHkVFAbt"
@@ -114,6 +115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log(product);
 
             const latestEpisodeDiv = document.createElement("div");
+            latestEpisodeDiv.style.width = "100%";
             const latestEpisodeDivHeader = document.createElement("div");
             const latestEpisodeDivHeaderText = document.createElement("h3");
             latestEpisodeDivHeaderText.style.paddingTop = "14px";
@@ -152,6 +154,149 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             middleColumnDiv.appendChild(latestEpisodeDiv);
         })
+
+        const reviewsDiv = document.createElement("div");
+        reviewsDiv.style.width = "100%";
+        reviewsDiv.style.display = "flex";
+        reviewsDiv.style.flex = "column";
+
+        const leftColumn = document.createElement("div");
+        leftColumn.style.width = "48%";
+        leftColumn.style.marginRight = "20px";
+        leftColumn.style.justifyContent = "space-between";
+
+        const firstLeftColumn = document.createElement("div");
+        firstLeftColumn.style.height = "23%";
+        firstLeftColumn.style.marginBottom = "20px";
+        firstLeftColumn.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
+
+        const secondLeftColumn = document.createElement("div");
+        secondLeftColumn.style.height = "23%";
+        secondLeftColumn.style.marginBottom = "20px";
+        secondLeftColumn.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
+        secondLeftColumn.style.textAlign = "right";
+
+        const thirdLeftColumn = document.createElement("div");
+        thirdLeftColumn.style.height = "fit-content";
+        thirdLeftColumn.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
+        thirdLeftColumn.style.textAlign = "center";
+
+        let reviewHeader = document.createElement("h2");
+        reviewHeader.innerText = "Rolling Stone - ";
+        reviewHeader.style.width = "100%";
+        reviewHeader.style.padding = "10px 0 10px 5px";
+
+        let reviewText = document.createElement("h4");
+        reviewText.style.padding = "6px";
+        reviewText.innerText = "'Melodic joy, insightful beats, podcast perfection.'";
+        firstLeftColumn.append(reviewHeader, reviewText);
+
+        let secondReviewHeader = document.createElement("h2");
+        secondReviewHeader.style.padding = "10px 5px 10px 0";
+
+        let secondReviewText = document.createElement("h4");
+        secondReviewText.style.padding = "6px";
+        secondReviewHeader.innerText = "Q Magazine - ";
+        secondReviewText.innerText = "'Dynamic fusion, pure brilliance! A must-listen podcast for music lovers.'";
+
+        secondLeftColumn.append(secondReviewHeader, secondReviewText);
+        leftColumn.append(firstLeftColumn, secondLeftColumn);
+
+        let thirdLeftColumnHeader = document.createElement("h2");
+        thirdLeftColumnHeader.innerText = "Latest Merch";
+        thirdLeftColumnHeader.style.width = "100%";
+
+        let thirdLeftColumnImage = document.createElement("img");
+
+        await fetch ("http://localhost:8080/api/customer/stripe/get-single-product", {
+            method: "GET",
+            headers: {
+                productId: "prod_PgQg334IZiZpxh"
+            }
+        }).then(res => res.json())
+        .then(product => {
+            thirdLeftColumnImage.src = product.images[0];
+        })
+
+        thirdLeftColumnImage.style.width = "95%";
+        thirdLeftColumn.append(thirdLeftColumnHeader, thirdLeftColumnImage);
+        leftColumn.appendChild(thirdLeftColumn);
+        
+        const rightColumn = document.createElement("div");
+        rightColumn.style.width = "48%";
+
+        const firstRightColumn = document.createElement("div");
+        firstRightColumn.style.height = "28%";
+        firstRightColumn.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
+
+        const secondRightColumn = document.createElement("div");
+        secondRightColumn.style.height = "18%";
+        secondRightColumn.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
+        secondRightColumn.style.textAlign = "right";
+
+        const thirdRightColumn = document.createElement("div");
+        thirdRightColumn.style.height = "fit-content";
+        thirdRightColumn.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
+        thirdRightColumn.style.textAlign = "center";
+
+        let reviewHeaderRight = document.createElement("h2");
+        reviewHeaderRight.innerText = "User MusicMum88 - ";
+        reviewHeaderRight.style.width = "100%";
+        reviewHeaderRight.style.padding = "10px 0 10px 5px";
+
+        let reviewTextRight = document.createElement("h4");
+        reviewTextRight.style.padding = "6px";
+        reviewTextRight.innerText = "'Musing Music podcast captivates with its diverse musical exploration and genuine passion.'";
+        firstRightColumn.append(reviewHeaderRight, reviewTextRight);
+
+        let secondReviewHeaderRight = document.createElement("h2");
+        secondReviewHeaderRight.style.padding = "10px 5px 10px 0";
+
+        let secondReviewTextRight = document.createElement("h4");
+        secondReviewTextRight.style.padding = "6px";
+        secondReviewHeaderRight.innerText = "User iLovePop - ";
+        secondReviewTextRight.innerText = "'Epic beats, pure vibes and insightful commentary!'";
+
+        secondRightColumn.append(secondReviewHeaderRight, secondReviewTextRight);
+
+        let thirdRightColumnHeader = document.createElement("h2");
+        thirdRightColumnHeader.innerText = "Latest Merch";
+        thirdRightColumnHeader.style.width = "100%";
+
+        let thirdRightColumnImage = document.createElement("img");
+
+        await fetch ("http://localhost:8080/api/customer/stripe/get-single-product", {
+            method: "GET",
+            headers: {
+                productId: "prod_PgQjUTmE0vehg2"
+            }
+        }).then(res => res.json())
+        .then(product => {
+            thirdRightColumnImage.src = product.images[0];
+        })
+
+        thirdRightColumnImage.style.width = "95%";
+        thirdRightColumn.append(thirdRightColumnHeader, thirdRightColumnImage);
+        rightColumn.append(thirdRightColumn, firstRightColumn, secondRightColumn);
+        reviewsDiv.append(leftColumn, rightColumn);
+        middleColumnDiv.appendChild(reviewsDiv);
+
+        const newsDiv = document.createElement("div");
+        newsDiv.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
+        const newsDivHeader = document.createElement("h2");
+        newsDivHeader.innerText = "Latest News";
+        newsDivHeader.marginTop = "10px";
+        newsDivHeader.style.textAlign = "center";
+        const newsDivContent = document.createElement("h4");
+        newsDivContent.style.margin = "10px";
+        newsDivContent.innerText = "Attention festival enthusiasts! Musing Music has secured exclusive behind-the-scenes access to the upcoming Harmony Haven Music Festival. Our team will be on-site, bringing you live interviews, sneak peeks, and all the insider details on the festival's most anticipated performances. Stay tuned for an immersive experience like never before. Our spotlight this week shines on Luna Serenade, a rising indie star with a genre-bending sound that seamlessly merges folk and electronic elements. Join us for an intimate conversation with Luna as she unveils the inspiration behind her latest album, 'Whispers in the Wind.' Hip-hop meets electronica in the dynamic collaboration between Mic Dropper and Synthwave Wizard. 'Rhythm Revolution' promises to be a genre-defying masterpiece, and we've got the inside scoop on this fusion of rap verses and synth-driven beats that will leave you craving more. In vinyl news, the resurgence of classic albums continues to break records. Discover the allure of analog sound as we explore the vinyl revival, speaking with enthusiasts who are spearheading the return of this timeless format. Join us for an in-depth analysis of the ever-evolving landscape of music streaming platforms. With new contenders entering the scene, we'll unravel the latest features, exclusive releases, and the ongoing battle for supremacy in the highly competitive streaming wars. Gear up for a musical journey that transcends boundaries and genres. Musing Music is your passport to the freshest updates, groundbreaking developments, and a sneak peek into the future of sound. Stay tuned for upcoming podcasts, interviews, and a symphony of revelations that will keep your ears glued to the beat! "
+        newsDiv.append(newsDivHeader, newsDivContent);
+        middleColumnDiv.appendChild(newsDiv);
+        contentDiv.appendChild(middleColumnDiv);
+
+
+
+
     }
 
     function createBuyButton(productId) {
