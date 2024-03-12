@@ -108,3 +108,22 @@ body::-webkit-scrollbar:hover {
 #twitterIcon {
     margin-right: 10px;
 }
+
+button {
+    border-radius: 15px;
+    border: none;
+    margin-bottom: 5px;
+    font-size: large;
+    padding: 10px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: grey;
+}
+
+input {
+    border-radius: 5px;
+    margin: auto auto 10px auto;
+    padding: 5px;
+}
