@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         //contentDiv.style.justifyContent = "space-between";
         await showFreePodcasts();
         await showMiddlecolumn();
+        await showRightColumn();
 
     }
 
@@ -216,6 +217,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }).then(res => res.json())
         .then(product => {
             thirdLeftColumnImage.src = product.images[0];
+            thirdLeftColumnImage.addEventListener("click", () => goToMerch());
+            thirdLeftColumnImage.style.cursor = "pointer";
         })
 
         thirdLeftColumnImage.style.width = "95%";
@@ -226,7 +229,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         rightColumn.style.width = "48%";
 
         const firstRightColumn = document.createElement("div");
-        firstRightColumn.style.height = "28%";
+        firstRightColumn.style.height = "22%";
         firstRightColumn.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
 
         const secondRightColumn = document.createElement("div");
@@ -242,7 +245,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let reviewHeaderRight = document.createElement("h2");
         reviewHeaderRight.innerText = "User MusicMum88 - ";
         reviewHeaderRight.style.width = "100%";
-        reviewHeaderRight.style.padding = "10px 0 10px 5px";
+        reviewHeaderRight.style.padding = "10px 0 3px 5px";
 
         let reviewTextRight = document.createElement("h4");
         reviewTextRight.style.padding = "6px";
@@ -273,6 +276,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }).then(res => res.json())
         .then(product => {
             thirdRightColumnImage.src = product.images[0];
+            thirdRightColumnImage.addEventListener("click", () => goToMerch());
+            thirdRightColumnImage.style.cursor = "pointer";
         })
 
         thirdRightColumnImage.style.width = "95%";
@@ -283,19 +288,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const newsDiv = document.createElement("div");
         newsDiv.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
-        const newsDivHeader = document.createElement("h2");
+        const newsDivHeader = document.createElement("h1");
         newsDivHeader.innerText = "Latest News";
         newsDivHeader.marginTop = "10px";
         newsDivHeader.style.textAlign = "center";
-        const newsDivContent = document.createElement("h4");
+        const newsDivContent = document.createElement("h3");
         newsDivContent.style.margin = "10px";
-        newsDivContent.innerText = "Attention festival enthusiasts! Musing Music has secured exclusive behind-the-scenes access to the upcoming Harmony Haven Music Festival. Our team will be on-site, bringing you live interviews, sneak peeks, and all the insider details on the festival's most anticipated performances. Stay tuned for an immersive experience like never before. Our spotlight this week shines on Luna Serenade, a rising indie star with a genre-bending sound that seamlessly merges folk and electronic elements. Join us for an intimate conversation with Luna as she unveils the inspiration behind her latest album, 'Whispers in the Wind.' Hip-hop meets electronica in the dynamic collaboration between Mic Dropper and Synthwave Wizard. 'Rhythm Revolution' promises to be a genre-defying masterpiece, and we've got the inside scoop on this fusion of rap verses and synth-driven beats that will leave you craving more. In vinyl news, the resurgence of classic albums continues to break records. Discover the allure of analog sound as we explore the vinyl revival, speaking with enthusiasts who are spearheading the return of this timeless format. Join us for an in-depth analysis of the ever-evolving landscape of music streaming platforms. With new contenders entering the scene, we'll unravel the latest features, exclusive releases, and the ongoing battle for supremacy in the highly competitive streaming wars. Gear up for a musical journey that transcends boundaries and genres. Musing Music is your passport to the freshest updates, groundbreaking developments, and a sneak peek into the future of sound. Stay tuned for upcoming podcasts, interviews, and a symphony of revelations that will keep your ears glued to the beat! "
+        newsDivContent.innerText = "Attention festival enthusiasts! Musing Music has secured exclusive behind-the-scenes access to the upcoming Harmony Haven Music Festival. Our team will be on-site, bringing you live interviews, sneak peeks, and all the insider details on the festival's most anticipated performances. Stay tuned for an immersive experience like never before.\n\nOur spotlight this week shines on Luna Serenade, a rising indie star with a genre-bending sound that seamlessly merges folk and electronic elements. Join us for an intimate conversation with Luna as she unveils the inspiration behind her latest album, 'Whispers in the Wind.' \n\nHip-hop meets electronica in the dynamic collaboration between Mic Dropper and Synthwave Wizard. 'Rhythm Revolution' promises to be a genre-defying masterpiece, and we've got the inside scoop on this fusion of rap verses and synth-driven beats that will leave you craving more. \n\nIn vinyl news, the resurgence of classic albums continues to break records. Discover the allure of analog sound as we explore the vinyl revival, speaking with enthusiasts who are spearheading the return of this timeless format. Join us for an in-depth analysis of the ever-evolving landscape of music streaming platforms. \n\nWith new contenders entering the scene, we'll unravel the latest features, exclusive releases, and the ongoing battle for supremacy in the highly competitive streaming wars. Gear up for a musical journey that transcends boundaries and genres. Musing Music is your passport to the freshest updates, groundbreaking developments, and a sneak peek into the future of sound. Stay tuned for upcoming podcasts, interviews, and a symphony of revelations that will keep your ears glued to the beat!\n\nBreaking news on Musing Music: Our upcoming episode will feature an exclusive interview with Melody Maestro, a renowned music producer and visionary in the industry. Tune in as we delve into the secrets behind his latest project, a groundbreaking album that promises to redefine the boundaries of contemporary music. Get ready for behind-the-scenes anecdotes, insights into his creative process, and a sneak peek into the mesmerizing soundscape he has crafted. Melody Maestro's innovative approach to composition is set to inspire aspiring musicians and captivate seasoned music enthusiasts alike."
         newsDiv.append(newsDivHeader, newsDivContent);
         middleColumnDiv.appendChild(newsDiv);
         contentDiv.appendChild(middleColumnDiv);
-
-
-
 
     }
 
@@ -305,6 +307,62 @@ document.addEventListener('DOMContentLoaded', async () => {
         
     }
 
+    async function showRightColumn() {
+        const merchcolumnDiv = document.createElement("div");
+        const merchColumnDivHeader = document.createElement("div");
+        merchColumnDivHeader.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
+        merchColumnDivHeader.style.margin = "0 5px 0 5px";
+        merchColumnDivHeader.style.textAlign = "center";
+        const merchColumnDivHeaderText = document.createElement("h2");
+        merchColumnDivHeaderText.innerText = "Merchandise";
+        merchColumnDivHeader.appendChild(merchColumnDivHeaderText);
+        merchcolumnDiv.appendChild(merchColumnDivHeader);
+        merchcolumnDiv.style.maxWidth = "25%";
+        contentDiv.appendChild(merchcolumnDiv);
 
+        let merchImgUrls = [];
+        let merchImageDiv = document.createElement("div");
+        merchImageDiv.style.textAlign = "center";
+
+        await fetch ("http://localhost:8080/api/customer/stripe/get-all-products") 
+        .then(res => res.json())
+        .then(products => {
+            console.log(products.data);
+
+            products.data.forEach(element => {
+                
+                let productName = element.name.substring(0, 7);
+
+                if (productName != "Podcast") {
+                    merchImgUrls.push(element.images[0]);
+                }
+
+            });
+            console.log(merchImgUrls);
+
+            for (let i = 6; i < 11; i++) {
+
+                let imageDiv = document.createElement("div");
+                imageDiv.style.textAlign = "center";
+                imageDiv.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
+                imageDiv.style.marginBottom = "10px";
+                let merchImage = document.createElement("img");
+                merchImage.src = merchImgUrls[i];
+                merchImage.style.width = "95%";
+                merchImage.style.height = "11%";
+                merchImage.style.margin = "8px 0 8px 0";
+                imageDiv.appendChild(merchImage);
+                merchImageDiv.appendChild(imageDiv);
+                merchImage.addEventListener("click", () => goToMerch());
+                merchImage.style.cursor = "pointer";
+            }
+            merchcolumnDiv.append(merchImageDiv);
+
+        })
+    }
+
+    async function goToMerch() {
+        console.log("click");
+    }
 
 })

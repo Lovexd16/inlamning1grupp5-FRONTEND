@@ -32,6 +32,15 @@ body {
     overflow-x: hidden;
 }
 
+body::-webkit-scrollbar {
+    width: 0;
+}
+
+body::-webkit-scrollbar:hover {
+    width: 0.5em;
+}
+
+    
 #navigationList {
     list-style-type: none;
     display: flex;
