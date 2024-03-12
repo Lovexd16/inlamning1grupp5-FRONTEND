@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const podcastLink = document.getElementById("podcastsLink");
     const merchandiseLink = document.getElementById("merchandiseLink");
     const contactLink = document.getElementById("contactLink");
-
     const greyBackground = "rgba(211, 211, 211, 0.3)";
+    sessionStorage.setItem("purchase", "");
 
     homeLink.addEventListener("click", () => {
         loadHomePage();
@@ -35,7 +35,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadCreateAccountForm();
     })
 
-
+    if (localStorage.getItem("purchase") == "") {
+        console.log("here: " + purchaseSuccessful);
+    } else {
+        console.log("start");
+    }
 
 
     const publicKey = await fetch("http://localhost:8080/api/customer/stripe/get-public-key")
@@ -330,17 +334,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     }
 
-    function createBuyButton(product) {
+    async function createBuyButton(product) {
 
         const paymentWindow = document.createElement("dialog");
         paymentWindow.style.background = "url('" + product.images[0] + "')";
         paymentWindow.style.backgroundSize = "cover";
         paymentWindow.style.backgroundRepeat = "no-repeat";
         paymentWindow.style.backgroundPosition = "center";
-        console.log(product.images[0]);
+        console.log(product);
         paymentWindow.style.color = "white";
         const paymentWindowHeader = document.createElement("h2");
-        paymentWindowHeader.innerText = "You are seconds away from listening to " + product.name + "!"
+        paymentWindowHeader.innerText = "You are about to purchase " + product.name + "!";
         paymentWindow.appendChild(paymentWindowHeader);
         paymentWindow.setAttribute("open", true);
         window.scrollTo(top);
@@ -476,6 +480,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const episodeDiv = document.createElement("div");
                 episodeDiv.style.width = "20%";
+                episodeDiv.style.textAlign = "center";
                 episodeDiv.style.maxWidth = "100%";
                 episodeDiv.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
                 episodeDiv.style.padding = "3px";
@@ -525,7 +530,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             products.data.reverse();
             
-            products.data.forEach(element => {
+            products.data.forEach(async element => {
                 
                 let productName = element.name.substring(0, 9);
 
@@ -534,10 +539,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                     paidEpisodeDiv.style.width = "20%";
                     const paidEpisodeDivHeader = document.createElement("div");
                     const paidEpisodeDivHeaderText = document.createElement("h3");
+                    const paidEpisodeDivHeaderPrice = document.createElement("h2");
+
+                    await fetch("http://localhost:8080/api/customer/stripe/get-product-price", {
+                        method: "GET",
+                        headers: {
+                            "priceId": element.defaultPrice
+                        }
+                    }).then(res => res.json())
+                    .then(price => {
+                        console.log(price);
+                        paidEpisodeDivHeaderPrice.innerText = (price.unitAmount / 100) + " " + price.currency;
+                    })
+
                     paidEpisodeDivHeaderText.style.paddingTop = "14px";
                     paidEpisodeDiv.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
                     paidEpisodeDivHeaderText.innerText = element.name;
-                    paidEpisodeDivHeader.appendChild(paidEpisodeDivHeaderText);
+                    paidEpisodeDivHeader.append(paidEpisodeDivHeaderText, paidEpisodeDivHeaderPrice);
                     paidEpisodeDiv.appendChild(paidEpisodeDivHeader);
         
                     paidEpisodeDiv.style.textAlign = "center";
@@ -566,7 +584,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     })
         
                     paidEpisodeDiv.appendChild(buyButton);
-        
                     paidContentDivPodcasts.appendChild(paidEpisodeDiv);  
                 }
         
@@ -623,50 +640,88 @@ document.addEventListener('DOMContentLoaded', async () => {
         loginChoice.appendChild(guestForm);
         
         submitBtn.addEventListener("click", async (e) => {
-            e.preventDefault();
-            loginChoice.innerHTML = "";
-            console.log(product.id);
-            const {clientSecret} = await fetch("http://localhost:8080/api/customer/stripe/one-time-purchase", {
-            method: "POST",
-            headers:{
-                "Content-Type": "application/json",
-                "productId": product.id
-            },
-            body : JSON.stringify ({
-                "firstName": guestFormFirstName.value,
-                "lastName": guestFormLastName.value,
-                "email": guestFormEmail.value,
-                "address1" : guestFormAddress1.value,
-                "address2": guestFormAddress2.value,
-                "postnumber": guestFormPostNumber.value,
-                "city": guestFormCity.value
+
+            if(guestFormFirstName.value.trim() != "" && guestFormLastName.value.trim() != "" && guestFormEmail.value.trim() != "" && guestFormAddress1.value.trim() != "" && guestFormPostNumber.value.trim() != "" && guestFormCity.value.trim() != "") {
+
+                e.preventDefault();
+                loginChoice.innerHTML = "";
+                let paymentElement = document.createElement("div");
+                paymentElement.id = "paymentElement";
+                loginChoice.appendChild(paymentElement);
+    
+                console.log(product.id);
+                const {clientSecret} = await fetch("http://localhost:8080/api/customer/stripe/one-time-purchase", {
+                method: "POST",
+                headers:{
+                    "Content-Type": "application/json",
+                    "productId": product.id
+                },
+                body : JSON.stringify ({
+                    "firstName": guestFormFirstName.value,
+                    "lastName": guestFormLastName.value,
+                    "email": guestFormEmail.value,
+                    "address1" : guestFormAddress1.value,
+                    "address2": guestFormAddress2.value,
+                    "postnumber": guestFormPostNumber.value,
+                    "city": guestFormCity.value
+                })
+            }).then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return res.json();
             })
-        }).then(res => res.json())
-        .then(res => {
+            .catch(error => {
+                const errorMessage = document.createElement("h2");
+                errorMessage.innerText = "All fields except 'Address 2' are required, including a valid email address.";
+                loginChoice.appendChild(errorMessage);
+            });
+            
             console.log({clientSecret});
         
             const elements = stripe.elements({clientSecret});
-            const paymentElement = elements.create('payment');
+            paymentElement = elements.create('payment');
             paymentElement.mount('#paymentElement');
-            loginChoice.appendChild(paymentElement);
         
-            const form = document.getElementById("paymentForm");
-            form.addEventListener("submit", async(e) => {
-                e.preventDefault();
-        
+            const paidEpisodeDivHeaderPrice = document.createElement("h2");
+
+                    await fetch("http://localhost:8080/api/customer/stripe/get-product-price", {
+                        method: "GET",
+                        headers: {
+                            "priceId": product.defaultPrice
+                        }
+                    }).then(res => res.json())
+                    .then(price => {
+                        console.log(price);
+                        paidEpisodeDivHeaderPrice.innerText = (price.unitAmount / 100) + " " + price.currency;
+                    })
+            const payBtn = document.createElement("button");
+            payBtn.innerText = "Confirm Payment";
+            loginChoice.append(paidEpisodeDivHeaderPrice, payBtn);
+    
+            payBtn.addEventListener("click", async () => {
+                
+                console.log("click");
                 const {error} = await stripe.confirmPayment({
                     elements,
                     confirmParams: {
-                        return_url: window.location.origin + "/complete.html"
+                        return_url: `${window.location.origin}/successfulPurchase.html?success=true&productId=${product.id}`
                     }
                 })
                 if (error) {
-                    const messages = document.getElementById("errors");
-                    messages.innerText = error.message;
-                }
-                })
+                    const errorMessage = document.createElement("h2");
+                errorMessage.innerText = "Something went wrong, please try again.";
+                loginChoice.appendChild(errorMessage);
+                } 
+            })
+            } else {
+                const errorMessage = document.createElement("h2");
+                alert("All fields except 'Address 2' are required, including a valid email address.");
+                loginChoice.appendChild(errorMessage);
+            }
         })
-    })
+
+
     }
 
     async function loadMerchandisePage() {
