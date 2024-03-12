@@ -4,6 +4,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     const createAccountLink = document.getElementById("createAccountLink");
     const loginLink = document.getElementById("loginLink");
     const contentDiv = document.getElementById("contentDiv");
+    const homeLink = document.getElementById("homeLink");
+    const podcastLink = document.getElementById("podcastsLink");
+    const merchandiseLink = document.getElementById("merchandiseLink");
+    const contactLink = document.getElementById("contactLink");
+
+    const greyBackground = "rgba(211, 211, 211, 0.3)";
+
+    homeLink.addEventListener("click", () => {
+        loadHomePage();
+    })
+
+    podcastLink.addEventListener("click", () => {
+        loadPodcastsPage();
+    })
+
+    merchandiseLink.addEventListener("click", () => {
+        loadMerchandisePage();
+    })
+
+    contactLink.addEventListener("click", () => {
+        loadContactPage();
+    })
+
+    loginLink.addEventListener("click", () => {
+        loadLoginForm();
+    })
+
+    createAccountLink.addEventListener("click", () => {
+        loadCreateAccountForm();
+    })
+
+
+
 
     const publicKey = await fetch("http://localhost:8080/api/customer/stripe/get-public-key")
     .then(res => res.text());
@@ -12,8 +45,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
     const stripe = Stripe(publicKey);
-    console.log(publicKey);
-
 
     subscribeDiv.addEventListener("mouseenter", () => {
         createAccountLink.style.textDecoration = "underline";
@@ -31,7 +62,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         contentDiv.innerHTML = "";
         contentDiv.style.display = "flex";
         contentDiv.style.flexDirection = "row";
-        //contentDiv.style.justifyContent = "space-between";
         await showFreePodcasts();
         await showMiddlecolumn();
         await showRightColumn();
@@ -113,7 +143,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }).then(res => res.json())
         .then(product => {
-            console.log(product);
 
             const latestEpisodeDiv = document.createElement("div");
             latestEpisodeDiv.style.width = "100%";
@@ -327,7 +356,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         await fetch ("http://localhost:8080/api/customer/stripe/get-all-products") 
         .then(res => res.json())
         .then(products => {
-            console.log(products.data);
 
             products.data.forEach(element => {
                 
@@ -338,7 +366,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
             });
-            console.log(merchImgUrls);
 
             for (let i = 6; i < 11; i++) {
 
@@ -353,7 +380,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 merchImage.style.margin = "8px 0 8px 0";
                 imageDiv.appendChild(merchImage);
                 merchImageDiv.appendChild(imageDiv);
-                merchImage.addEventListener("click", () => goToMerch());
+                merchImage.addEventListener("click", () => loadMerchandisePage());
                 merchImage.style.cursor = "pointer";
             }
             merchcolumnDiv.append(merchImageDiv);
@@ -361,8 +388,148 @@ document.addEventListener('DOMContentLoaded', async () => {
         })
     }
 
-    async function goToMerch() {
-        console.log("click");
+    async function loadPodcastsPage() {
+        contentDiv.innerHTML = "";
+        contentDiv.style.display = "flex";
+        contentDiv.style.flexDirection = "column";
+
+        const freeContentDiv = document.createElement("div");
+        freeContentDiv.style.width = "100vw";
+
+        const freeContentDivHeader = document.createElement("h1");
+        freeContentDivHeader.innerText = "Free Podcasts";
+        freeContentDivHeader.style.width = "100%";
+        freeContentDivHeader.style.backgroundColor = greyBackground;
+        freeContentDivHeader.style.padding = "10px 0 10px 0";
+        freeContentDivHeader.style.textAlign = "center";
+        freeContentDiv.appendChild(freeContentDivHeader);
+
+        const freeContentDivPodcasts = document.createElement("div");
+        freeContentDivPodcasts.style.display = "flex";
+        freeContentDivPodcasts.style.flexDirection = "row";
+        freeContentDivPodcasts.style.justifyContent = "space-between";
+
+        for (let i = 1; i < 6; i++) {
+            await fetch("http://localhost:8080/api/podcasts/get-free-podcasts", {
+                method: "GET",
+                headers: {
+                    episodeNumber : i
+                }
+            })
+            .then(res => res.blob())
+            .then(blob => {
+                const audio = new Audio();
+                audio.src = URL.createObjectURL(blob);
+                audio.style.maxWidth = "100%";
+                audio.controls = true;
+                audio.style.width = "98%";
+
+                const names = ["Origins", "Hip Hop", "Black Sabbath", "Reggae", "Elvis"];
+
+                const episodeDiv = document.createElement("div");
+                episodeDiv.style.width = "20%";
+                episodeDiv.style.maxWidth = "100%";
+                episodeDiv.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
+                episodeDiv.style.padding = "3px";
+                episodeDiv.style.margin = "0 5px 5px 5px";
+
+                const episodeDivHeader = document.createElement("div");
+                const episodeDivHeaderText = document.createElement("h3");
+                episodeDivHeaderText.innerText = "Podcast #" + i + " - " + names[i - 1];
+                episodeDivHeader.appendChild(episodeDivHeaderText);
+                episodeDiv.appendChild(episodeDivHeader);
+
+                const episodeImage = document.createElement("img");
+                episodeImage.src = "/resources/images/episode" + i + "Free.jpg";
+                episodeImage.style.maxWidth = "100%";
+                episodeImage.style.width = "300px";
+                episodeImage.style.height = "200px";
+                episodeImage.style.overflowY = "hidden";
+
+                episodeDiv.append(episodeImage, audio);
+                freeContentDivPodcasts.appendChild(episodeDiv)
+            })
+        }
+        freeContentDiv.appendChild(freeContentDivPodcasts);
+        contentDiv.appendChild(freeContentDiv);
+        
+        const paidContentDiv = document.createElement("div");
+        paidContentDiv.style.width = "100vw";
+        paidContentDiv.style.marginBottom = "10px";
+
+        const paidContentDivHeader = document.createElement("h1");
+        paidContentDivHeader.innerText = "Podcasts for Purchase";
+        paidContentDivHeader.style.width = "100%";
+        paidContentDivHeader.style.backgroundColor = greyBackground;
+        paidContentDivHeader.style.padding = "10px 0 10px 0";
+        paidContentDivHeader.style.textAlign = "center";
+        paidContentDiv.appendChild(paidContentDivHeader);
+
+        const paidContentDivPodcasts = document.createElement("div");
+        paidContentDivPodcasts.style.display = "flex";
+        paidContentDivPodcasts.style.flexDirection = "row";
+        paidContentDivPodcasts.style.flexWrap = "wrap";
+        paidContentDivPodcasts.style.justifyContent = "space-between";
+
+        await fetch ("http://localhost:8080/api/customer/stripe/get-all-products") 
+        .then(res => res.json())
+        .then(products => {
+
+            products.data.reverse();
+            
+            products.data.forEach(element => {
+                
+                let productName = element.name.substring(0, 9);
+
+                if (productName == "Podcast #") {
+                    const paidEpisodeDiv = document.createElement("div");
+                    paidEpisodeDiv.style.width = "20%";
+                    const paidEpisodeDivHeader = document.createElement("div");
+                    const paidEpisodeDivHeaderText = document.createElement("h3");
+                    paidEpisodeDivHeaderText.style.paddingTop = "14px";
+                    paidEpisodeDiv.style.backgroundColor = "rgba(211, 211, 211, 0.3)"
+                    paidEpisodeDivHeaderText.innerText = element.name;
+                    paidEpisodeDivHeader.appendChild(paidEpisodeDivHeaderText);
+                    paidEpisodeDiv.appendChild(paidEpisodeDivHeader);
+        
+                    paidEpisodeDiv.style.textAlign = "center";
+                    const paidEpisodeImage = document.createElement("img");
+                    paidEpisodeImage.src = element.images[0];
+                    paidEpisodeImage.style.width = "95%";
+                    paidEpisodeDiv.appendChild(paidEpisodeImage);
+        
+                    const buyButton = document.createElement("button");
+                    buyButton.type = "button";
+                    buyButton.addEventListener("click", () => createBuyButton(element.id)); 
+                    buyButton.style.borderRadius = "15px";
+                    buyButton.innerText = "Buy Episode";
+                    buyButton.style.border = "none";
+                    buyButton.style.marginBottom = "5px";
+                    buyButton.style.fontSize = "Large"; 
+                    buyButton.style.padding = "10px";
+                    buyButton.style.cursor = "pointer";
+                    
+                    buyButton.addEventListener("mouseenter", () => {
+                        buyButton.style.backgroundColor = "grey";
+                    })
+                
+                    buyButton.addEventListener("mouseleave", () => {
+                        buyButton.style.backgroundColor = "";
+                    })
+        
+                    paidEpisodeDiv.appendChild(buyButton);
+        
+                    paidContentDivPodcasts.appendChild(paidEpisodeDiv);  
+                }
+        
+            });
+            paidContentDiv.appendChild(paidContentDivPodcasts);
+            contentDiv.appendChild(paidContentDiv);
+        })
+    }
+
+    async function loadMerchandisePage() {
+        
     }
 
 })
