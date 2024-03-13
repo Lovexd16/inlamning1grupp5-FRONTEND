@@ -1,15 +1,13 @@
 document.addEventListener('DOMContentLoaded', async () => {
     
     const subscribeDiv = document.getElementById("subscribeDiv");
-    const createAccountLink = document.getElementById("createAccountLink");
-    const memberPage = document.getElementById("loginLink");
     const contentDiv = document.getElementById("contentDiv");
     const homeLink = document.getElementById("homeLink");
     const podcastLink = document.getElementById("podcastsLink");
     const merchandiseLink = document.getElementById("merchandiseLink");
     const contactLink = document.getElementById("contactLink");
     const greyBackground = "rgba(211, 211, 211, 0.3)";
-    sessionStorage.setItem("purchase", "");
+    const navList = document.getElementById("navigationList");
 
     homeLink.addEventListener("click", () => {
         loadHomePage();
@@ -27,14 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadContactPage();
     })
 
-    memberPage.addEventListener("click", () => {
-        loadLoginForm();
-    })
-
-    createAccountLink.addEventListener("click", () => {
-        loadCreateAccountForm();
-    })
-
+    
     if (localStorage.getItem("purchase") == "") {
         console.log("here: " + purchaseSuccessful);
     } else {
@@ -59,17 +50,86 @@ document.addEventListener('DOMContentLoaded', async () => {
         createAccountLink.style.textDecoration = "";
         memberPage.style.textDecoration = "";
     })
-
+    
     await loadHomePage();
-
+    
     async function loadHomePage() {
         contentDiv.innerHTML = "";
         contentDiv.style.display = "flex";
         contentDiv.style.flexDirection = "row";
+        await checkLoggedIn();
         await showFreePodcasts();
         await showMiddlecolumn();
         await showRightColumn();
-
+        
+    }
+    
+    async function checkLoggedIn() {
+        let userId = sessionStorage.getItem("userID");
+        console.log(userId);
+                
+        if (userId && userId.trim().length > 0) {
+            console.log("logged in");
+            if(navList.querySelector("#loginLink")) {
+                navList.removeChild(navList.querySelector("#loginLink"))
+            }
+            if(navList.querySelector("#createAccountLink")) {
+                navList.removeChild(navList.querySelector("#createAccountLink"))
+            }
+            if(!navList.querySelector("#memberPage") && !navList.querySelector("#logOutLink")) {
+                const memberPage = document.createElement("li");
+                memberPage.innerText = "Member Page";
+                memberPage.id = "memberPage";
+                const logOutLink = document.createElement("li");
+                logOutLink.innerText = "Log out";
+                logOutLink.id = "logOutLink";
+                navList.append(memberPage, logOutLink);
+                if (isUUID(sessionStorage.getItem("userID"))) {
+                    userId = sessionStorage.getItem("userID");
+                }
+                memberPage.addEventListener("click", async () => {
+                    await fetch("http://localhost:8080/api/user/get-user-by-id", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "userId": userId 
+                        }
+                    }).then(res => res.json())
+                    .then(user => {
+                        loadAccountPage(user);
+                    })
+                })
+                logOutLink.addEventListener("click", () => {
+                    console.log("clickL");
+                    sessionStorage.removeItem("userID");
+                    loadHomePage();
+                })
+            }
+        } else {
+            console.log("not logged");
+            if(navList.querySelector("#memberPage")) {
+                navList.removeChild(navList.querySelector("#memberPage"))
+            }
+            if(navList.querySelector("#logOutLink")) {
+                navList.removeChild(navList.querySelector("#logOutLink"))
+            }
+            if(!navList.querySelector("#createAccountLink") && !navList.querySelector("#loginLink")) {
+                const createAccountLink = document.createElement("li");
+                createAccountLink.innerText = "Create Account";
+                createAccountLink.id = "createAccountLink"
+                const loginLink = document.createElement("li");
+                loginLink.innerText = "Log in";
+                loginLink.id = "loginLink";
+                navList.append(createAccountLink, loginLink);
+                loginLink.addEventListener("click", () => {
+                    loadLoginForm();
+                })
+            
+                createAccountLink.addEventListener("click", () => {
+                    loadCreateAccountForm();
+                })
+            }
+        }
     }
 
     async function showFreePodcasts() {
@@ -358,23 +418,48 @@ document.addEventListener('DOMContentLoaded', async () => {
         paymentWindow.appendChild(paymentWindowHeader);
         paymentWindow.setAttribute("open", true);
         window.scrollTo(top);
-        
         const loginChoice = document.createElement("div");
         loginChoice.style.width = "100%";
         loginChoice.style.textAlign = "center";
         const loginChoiceHeader = document.createElement("h3");
-        loginChoiceHeader.innerText = "Would you like to log in or buy as guest?";
-        loginChoiceHeader.style.width = "100%";
-        const loginBtn = document.createElement("button");
-        loginBtn.innerText = "Log in";
-        loginBtn.style.marginRight = "30px"
-        const guestBtn = document.createElement("button");
-        guestBtn.innerText = "Guest";
-        loginChoice.append(loginChoiceHeader, loginBtn, guestBtn);
-        paymentWindow.appendChild(loginChoice);
-        loginBtn.addEventListener("click", () => loginBtnEventListener(product, paymentWindow, loginChoice));
-        guestBtn.addEventListener("click", () => guestgBtnEventListener(product, paymentWindow, loginChoice));
-
+        
+        let userIdcheck = sessionStorage.getItem("userID");
+        if (userIdcheck && userIdcheck.trim().length > 0) {
+            await fetch("http://localhost:8080/api/user/get-user-by-id", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "userId": userIdcheck
+                        }
+                    }).then(res => res.json())
+                    .then(user => {
+                        loadAccountPage(user);
+                        loginChoiceHeader.innerText = "You are logged in as " + user.username + "\nEnter your password to continue to purchase.";
+                        loginChoiceHeader.style.width = "100%";
+                        const password = document.createElement("input");
+                        password.type = "password";
+                        password.style.display = "block";
+                        const loginBtn = document.createElement("button");
+                        loginBtn.innerText = "Confirm";
+                        loginBtn.style.marginRight = "30px"
+                        loginChoice.append(loginChoiceHeader, password, loginBtn);
+                        paymentWindow.appendChild(loginChoice);
+                        loginBtn.addEventListener("click", () => loginBtnEventListener(product, paymentWindow, loginChoice, password.value, user));
+                    })
+                        
+        } else {
+            loginChoiceHeader.innerText = "Would you like to log in or buy as guest?";
+            loginChoiceHeader.style.width = "100%";
+            const loginBtn = document.createElement("button");
+            loginBtn.innerText = "Log in";
+            loginBtn.style.marginRight = "30px"
+            const guestBtn = document.createElement("button");
+            guestBtn.innerText = "Guest";
+            loginChoice.append(loginChoiceHeader, loginBtn, guestBtn);
+            paymentWindow.appendChild(loginChoice);
+            loginBtn.addEventListener("click", () => loginBtnEventListener(product, paymentWindow, loginChoice));
+            guestBtn.addEventListener("click", () => guestgBtnEventListener(product, paymentWindow, loginChoice));
+        }
         const cancelButton = document.createElement("button");
         cancelButton.innerText = "Cancel";
         cancelButton.style.borderRadius = "15px";
@@ -603,8 +688,128 @@ document.addEventListener('DOMContentLoaded', async () => {
         })
     }
 
-    async function loginBtnEventListener(paymentWindow) {
+    async function loginBtnEventListener(product, paymentWindow, loginChoice, password, user) {
+        loginChoice.innerHTML = "";
+        const memberHeader = document.createElement("h3");
+        memberHeader.innerText = "Member";
+        const memberForm = document.createElement("form");
+        memberForm.style.textAlign = "center";
+        memberForm.style.display = "inline";
+        const memberFormFirstName = document.createElement("h3");
+        memberFormFirstName.innerText = user.firstName;
+        memberFormFirstName.style.display = "block";
+        const memberFormLastName = document.createElement("h3");
+        memberFormLastName.innerText = user.lastName;
+        memberFormLastName.style.display = "block";
+        const memberFormEmail = document.createElement("h3");
+        memberFormEmail.innerText = user.email;
+        memberFormEmail.type = "email";
+        memberFormEmail.style.display = "block";
+        const memberFormAddress1 = document.createElement("input");
+        memberFormAddress1.placeholder = "Address 1";
+        memberFormAddress1.style.display = "block";
+        memberFormAddress1.setAttribute("required", true);
+        const memberFormAddress2 = document.createElement("input");
+        memberFormAddress2.placeholder = "Address 2";
+        memberFormAddress2.style.display = "block";
+        const memberFormPostNumber = document.createElement("input");
+        memberFormPostNumber.placeholder = "Post Number";
+        memberFormPostNumber.style.display = "block";
+        memberFormPostNumber.setAttribute("required", true);
+        const memberFormCity = document.createElement("input");
+        memberFormCity.placeholder = "City";
+        memberFormCity.style.display = "block";
+        memberFormCity.setAttribute("required", true);
+        const submitBtn = document.createElement("button");
+        submitBtn.type = "button";
+        submitBtn.innerText = "Submit";
+        
+        memberForm.append(memberFormFirstName, memberFormLastName, memberFormEmail, memberFormAddress1, memberFormAddress2, memberFormPostNumber, memberFormCity, submitBtn);
+        loginChoice.appendChild(memberForm);
+        
+        submitBtn.addEventListener("click", async (e) => {
 
+            if(memberFormAddress1.value.trim() != "" && memberFormPostNumber.value.trim() != "" && memberFormCity.value.trim() != "") {
+
+                e.preventDefault();
+                loginChoice.innerHTML = "";
+                let paymentElement = document.createElement("div");
+                paymentElement.id = "paymentElement";
+                loginChoice.appendChild(paymentElement);
+    
+                console.log(product.id);
+                const {clientSecret} = await fetch("http://localhost:8080/api/customer/stripe/one-time-purchase", {
+                method: "POST",
+                headers:{
+                    "Content-Type": "application/json",
+                    "productId": product.id,
+                    "username": user.username,
+                    "password": password
+                },
+                body : JSON.stringify ({
+                    "firstName": memberFormFirstName.innerText,
+                    "lastName": memberFormLastName.innerText,
+                    "email": memberFormEmail.innerText,
+                    "address1" : memberFormAddress1.value,
+                    "address2": memberFormAddress2.value,
+                    "postnumber": memberFormPostNumber.value,
+                    "city": memberFormCity.value
+                })
+            }).then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return res.json();
+            })
+            .catch(error => {
+                const errorMessage = document.createElement("h2");
+                errorMessage.innerText = "All fields except 'Address 2' are required, including a valid email address.";
+                loginChoice.appendChild(errorMessage);
+            });
+            
+            console.log({clientSecret});
+        
+            const elements = stripe.elements({clientSecret});
+            paymentElement = elements.create('payment');
+            paymentElement.mount('#paymentElement');
+        
+            const paidEpisodeDivHeaderPrice = document.createElement("h2");
+
+                    await fetch("http://localhost:8080/api/customer/stripe/get-product-price", {
+                        method: "GET",
+                        headers: {
+                            "priceId": product.defaultPrice
+                        }
+                    }).then(res => res.json())
+                    .then(price => {
+                        console.log(price);
+                        paidEpisodeDivHeaderPrice.innerText = (price.unitAmount / 100) + " " + price.currency;
+                    })
+            const payBtn = document.createElement("button");
+            payBtn.innerText = "Confirm Payment";
+            loginChoice.append(paidEpisodeDivHeaderPrice, payBtn);
+    
+            payBtn.addEventListener("click", async () => {
+                
+                console.log("click");
+                const {error} = await stripe.confirmPayment({
+                    elements,
+                    confirmParams: {
+                        return_url: `${window.location.origin}/successfulPurchase.html?success=true&productId=${product.id}`
+                    }
+                })
+                if (error) {
+                    const errorMessage = document.createElement("h2");
+                errorMessage.innerText = "Something went wrong, please try again.";
+                loginChoice.appendChild(errorMessage);
+                } 
+            })
+            } else {
+                const errorMessage = document.createElement("h2");
+                alert("All fields except 'Address 2' are required, including a valid email address.");
+                loginChoice.appendChild(errorMessage);
+            }
+        })
     }
 
     async function guestgBtnEventListener(product, paymentWindow, loginChoice) {
@@ -730,8 +935,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 loginChoice.appendChild(errorMessage);
             }
         })
-
-
     }
 
     async function loadMerchandisePage() {
@@ -926,7 +1129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.log(user);
                 createAccountDialog.removeAttribute("open");
                 loadAccountPage(user);
-                sessionStorage.setItem("user id", user.userId);
+                sessionStorage.setItem("userID", user.userId);
             })
         } else {
             alert("You must fill in all the fields");
@@ -934,6 +1137,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function loadAccountPage(user) {
+        checkLoggedIn();
         contentDiv.innerHTML = "";
         contentDiv.style.display = "flex";
         contentDiv.style.flexDirection = "column";
@@ -1210,6 +1414,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }).then(res => res.json())
             .then(user => {
+                sessionStorage.setItem("userID", user.userId);
                 loadAccountPage(user);
             })
         })
@@ -1245,5 +1450,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         loginDialog.setAttribute("open", true);
 
 
+    }
+
+    function isUUID(userId) {
+        const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+        return uuidPattern.test(userId);
     }
 })
