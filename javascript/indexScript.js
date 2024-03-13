@@ -725,7 +725,97 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function loadMerchandisePage() {
+
+        contentDiv.innerHTML = "";
+        contentDiv.style.display = "flex";
+        contentDiv.style.flexDirection = "column";
+
+        const paidContentDiv = document.createElement("div");
+        paidContentDiv.style.width = "100vw";
+        paidContentDiv.style.marginBottom = "10px";
+
+        const paidContentDivHeader = document.createElement("h1");
+        paidContentDivHeader.innerText = "Merchandise";
+        paidContentDivHeader.style.width = "100%";
+        paidContentDivHeader.style.backgroundColor = greyBackground;
+        paidContentDivHeader.style.padding = "10px 0 10px 0";
+        paidContentDivHeader.style.textAlign = "center";
+        paidContentDiv.appendChild(paidContentDivHeader);
+
+        const paidContentDivPodcasts = document.createElement("div");
+        paidContentDivPodcasts.style.display = "flex";
+        paidContentDivPodcasts.style.textAlign = "left";
+        paidContentDivPodcasts.style.flexDirection = "row";
+        paidContentDivPodcasts.style.flexWrap = "wrap";
+        paidContentDivPodcasts.style.justifyContent = "left";
+
+        await fetch ("http://localhost:8080/api/customer/stripe/get-all-products") 
+        .then(res => res.json())
+        .then(products => {
+            
+            products.data.forEach(async element => {
+                
+                let productName = element.name.substring(0, 7);
+
+                if (productName != "Podcast") {
+                    const paidEpisodeDiv = document.createElement("div");
+                    paidEpisodeDiv.style.width = "20%";
+                    paidEpisodeDiv.style.marginBottom = "10px";
+                    const paidEpisodeDivHeader = document.createElement("div");
+                    const paidEpisodeDivHeaderText = document.createElement("h3");
+                    const paidEpisodeDivHeaderPrice = document.createElement("h2");
+
+                    await fetch("http://localhost:8080/api/customer/stripe/get-product-price", {
+                        method: "GET",
+                        headers: {
+                            "priceId": element.defaultPrice
+                        }
+                    }).then(res => res.json())
+                    .then(price => {
+                        console.log(price);
+                        paidEpisodeDivHeaderPrice.innerText = (price.unitAmount / 100) + " " + price.currency;
+                    })
+
+                    paidEpisodeDivHeaderText.style.paddingTop = "14px";
+                    paidEpisodeDiv.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
+                    paidEpisodeDivHeaderText.innerText = element.name;
+                    paidEpisodeDivHeader.append(paidEpisodeDivHeaderText, paidEpisodeDivHeaderPrice);
+                    paidEpisodeDiv.appendChild(paidEpisodeDivHeader);
         
+                    paidEpisodeDiv.style.textAlign = "center";
+                    const paidEpisodeImage = document.createElement("img");
+                    paidEpisodeImage.src = element.images[0];
+                    paidEpisodeImage.style.width = "95%";
+                    paidEpisodeImage.style.height = "400px";
+                    paidEpisodeDiv.appendChild(paidEpisodeImage);
+        
+                    const buyButton = document.createElement("button");
+                    buyButton.type = "button";
+                    buyButton.addEventListener("click", () => createBuyButton(element)); 
+                    buyButton.style.borderRadius = "15px";
+                    buyButton.innerText = "Buy";
+                    buyButton.style.border = "none";
+                    buyButton.style.marginBottom = "5px";
+                    buyButton.style.fontSize = "Large"; 
+                    buyButton.style.padding = "10px";
+                    buyButton.style.cursor = "pointer";
+                    
+                    buyButton.addEventListener("mouseenter", () => {
+                        buyButton.style.backgroundColor = "grey";
+                    })
+                
+                    buyButton.addEventListener("mouseleave", () => {
+                        buyButton.style.backgroundColor = "";
+                    })
+        
+                    paidEpisodeDiv.appendChild(buyButton);
+                    paidContentDivPodcasts.appendChild(paidEpisodeDiv);  
+                }
+        
+            });
+            paidContentDiv.appendChild(paidContentDivPodcasts);
+            contentDiv.appendChild(paidContentDiv);
+        })
     }
 
 })
