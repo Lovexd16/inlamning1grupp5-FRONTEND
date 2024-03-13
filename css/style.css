@@ -76,7 +76,7 @@ body::-webkit-scrollbar:hover {
     position: absolute;
     text-align: center;
     right: 5%;
-    top: 10%;
+    top: 7%;
     transform: rotate(30deg);
 }
 

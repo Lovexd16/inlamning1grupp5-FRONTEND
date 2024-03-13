@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     const subscribeDiv = document.getElementById("subscribeDiv");
     const createAccountLink = document.getElementById("createAccountLink");
-    const loginLink = document.getElementById("loginLink");
+    const memberPage = document.getElementById("loginLink");
     const contentDiv = document.getElementById("contentDiv");
     const homeLink = document.getElementById("homeLink");
     const podcastLink = document.getElementById("podcastsLink");
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadContactPage();
     })
 
-    loginLink.addEventListener("click", () => {
+    memberPage.addEventListener("click", () => {
         loadLoginForm();
     })
 
@@ -52,12 +52,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     subscribeDiv.addEventListener("mouseenter", () => {
         createAccountLink.style.textDecoration = "underline";
-        loginLink.style.textDecoration = "underline";
+        memberPage.style.textDecoration = "underline";
     })
 
     subscribeDiv.addEventListener("mouseleave", () => {
         createAccountLink.style.textDecoration = "";
-        loginLink.style.textDecoration = "";
+        memberPage.style.textDecoration = "";
     })
 
     await loadHomePage();
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 episodeDiv.style.maxWidth = "100%";
                 episodeDiv.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
                 episodeDiv.style.padding = "3px";
-                episodeDiv.style.margin = "0 5px 5px 5px";
+                episodeDiv.style.margin = "0 5px 35px 5px";
 
                 const episodeDivHeader = document.createElement("div");
                 const episodeDivHeaderText = document.createElement("h3");
@@ -214,6 +214,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         thirdLeftColumn.style.height = "fit-content";
         thirdLeftColumn.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
         thirdLeftColumn.style.textAlign = "center";
+        thirdLeftColumn.addEventListener("click", () => {
+            loadMerchandisePage();
+        })
 
         let reviewHeader = document.createElement("h2");
         reviewHeader.innerText = "Rolling Stone - ";
@@ -271,6 +274,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         secondRightColumn.style.textAlign = "right";
 
         const thirdRightColumn = document.createElement("div");
+        thirdRightColumn.addEventListener("click", () => {
+            loadMerchandisePage();
+        })
         thirdRightColumn.style.height = "fit-content";
         thirdRightColumn.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
         thirdRightColumn.style.textAlign = "center";
@@ -320,12 +326,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         middleColumnDiv.appendChild(reviewsDiv);
 
         const newsDiv = document.createElement("div");
+        newsDiv.style.marginTop = "30px";
+        newsDiv.style.bottom = "0%";
+        newsDiv.style.paddingBottom = "30px";
+        newsDiv.style.display = "block";
         newsDiv.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
         const newsDivHeader = document.createElement("h1");
         newsDivHeader.innerText = "Latest News";
-        newsDivHeader.marginTop = "10px";
+        newsDivHeader.marginTop = "20px";
         newsDivHeader.style.textAlign = "center";
-        const newsDivContent = document.createElement("h3");
+        const newsDivContent = document.createElement("h2");
         newsDivContent.style.margin = "10px";
         newsDivContent.innerText = "Attention festival enthusiasts! Musing Music has secured exclusive behind-the-scenes access to the upcoming Harmony Haven Music Festival. Our team will be on-site, bringing you live interviews, sneak peeks, and all the insider details on the festival's most anticipated performances. Stay tuned for an immersive experience like never before.\n\nOur spotlight this week shines on Luna Serenade, a rising indie star with a genre-bending sound that seamlessly merges folk and electronic elements. Join us for an intimate conversation with Luna as she unveils the inspiration behind her latest album, 'Whispers in the Wind.' \n\nHip-hop meets electronica in the dynamic collaboration between Mic Dropper and Synthwave Wizard. 'Rhythm Revolution' promises to be a genre-defying masterpiece, and we've got the inside scoop on this fusion of rap verses and synth-driven beats that will leave you craving more. \n\nIn vinyl news, the resurgence of classic albums continues to break records. Discover the allure of analog sound as we explore the vinyl revival, speaking with enthusiasts who are spearheading the return of this timeless format. Join us for an in-depth analysis of the ever-evolving landscape of music streaming platforms. \n\nWith new contenders entering the scene, we'll unravel the latest features, exclusive releases, and the ongoing battle for supremacy in the highly competitive streaming wars. Gear up for a musical journey that transcends boundaries and genres. Musing Music is your passport to the freshest updates, groundbreaking developments, and a sneak peek into the future of sound. Stay tuned for upcoming podcasts, interviews, and a symphony of revelations that will keep your ears glued to the beat!\n\nBreaking news on Musing Music: Our upcoming episode will feature an exclusive interview with Melody Maestro, a renowned music producer and visionary in the industry. Tune in as we delve into the secrets behind his latest project, a groundbreaking album that promises to redefine the boundaries of contemporary music. Get ready for behind-the-scenes anecdotes, insights into his creative process, and a sneak peek into the mesmerizing soundscape he has crafted. Melody Maestro's innovative approach to composition is set to inspire aspiring musicians and captivate seasoned music enthusiasts alike."
         newsDiv.append(newsDivHeader, newsDivContent);
@@ -818,4 +828,422 @@ document.addEventListener('DOMContentLoaded', async () => {
         })
     }
 
+    async function loadCreateAccountForm() {
+        const createAccountDialog = document.createElement("dialog");
+        createAccountDialog.style.textAlign = "center";
+
+        const createAccountHeader = document.createElement("h2");
+        createAccountHeader.innerText = "Create Account";
+        createAccountDialog.appendChild(createAccountHeader);
+
+        createAccountDialog.setAttribute("open", true);
+
+        const createForm = document.createElement("form");
+        createForm.style.display = "inline";
+
+        const firstNameInput = document.createElement("input");
+        firstNameInput.placeholder = "First Name";
+        firstNameInput.setAttribute("Reqiured", true);
+        firstNameInput.style.display = "block";
+
+        const lastNameInput = document.createElement("input");
+        lastNameInput.placeholder = "Last Name";
+        lastNameInput.setAttribute("Reqiured", true);
+        lastNameInput.style.display = "block";
+
+        const emailInput = document.createElement("input");
+        emailInput.placeholder = "@email";
+        emailInput.setAttribute("Reqiured", true);
+        emailInput.type = "email";
+        emailInput.style.display = "block";
+
+        const usernameInput = document.createElement("input");
+        usernameInput.placeholder = "Username (5 - 15 char)";
+        usernameInput.setAttribute("Reqiured", true);
+        usernameInput.setAttribute("Min", 5);
+        usernameInput.setAttribute("Max", 15);
+        usernameInput.style.display = "block";
+
+        const passwordInput = document.createElement("input");
+        passwordInput.placeholder = "password (8 - 20 char)";
+        passwordInput.setAttribute("Min", 8);
+        passwordInput.setAttribute("Max", 20);
+        passwordInput.type = "password";
+        passwordInput.style.display = "block";
+
+        const createButton = document.createElement("button");
+        createButton.type = "submit";
+        createButton.innerText = "Create Account";
+
+        createForm.append(firstNameInput, lastNameInput, emailInput, usernameInput, passwordInput, createButton);
+        createAccountDialog.appendChild(createForm);
+
+        const cancelButton = document.createElement("button");
+        cancelButton.innerText = "Cancel";
+        cancelButton.style.borderRadius = "15px";
+        cancelButton.style.border = "none";
+        cancelButton.style.marginBottom = "5px";
+        cancelButton.style.fontSize = "Large"; 
+        cancelButton.style.padding = "10px";
+        cancelButton.style.cursor = "pointer";
+
+        cancelButton.addEventListener("click", () => {
+            createAccountDialog.removeAttribute("open");
+        })
+        cancelButton.addEventListener("mouseenter", () => {
+            cancelButton.style.backgroundColor = "grey";
+        })
+        
+        cancelButton.addEventListener("mouseleave", () => {
+            cancelButton.style.backgroundColor = "";
+        })
+        
+        createAccountDialog.appendChild(cancelButton);
+        contentDiv.appendChild(createAccountDialog);
+        createButton.addEventListener("click", (e) => createButtonEventListener(createAccountDialog, e, firstNameInput.value, lastNameInput.value, emailInput.value, usernameInput.value, passwordInput.value))
+    }
+
+    async function createButtonEventListener(createAccountDialog, e, firstNameInput, lastNameInput, emailInput, usernameInput, passwordInput) {
+
+        e.preventDefault();
+        console.log(firstNameInput + lastNameInput, emailInput, usernameInput, passwordInput)
+
+        if(firstNameInput.trim() != "" && lastNameInput.trim() != "" && emailInput.trim() != "" && usernameInput.trim() != "" && passwordInput.trim() != "" && passwordInput.length > 7 && usernameInput.length > 5 && passwordInput.length < 20 && usernameInput.length < 15) {
+            await fetch("http://localhost:8080/api/user/create-user-account", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "firstName": firstNameInput,
+                    "lastName": lastNameInput,
+                    "email": emailInput,
+                    "username": usernameInput,
+                    "password": passwordInput
+                })
+            }).then(res => res.json())
+            .then(user => {
+                console.log(user);
+                createAccountDialog.removeAttribute("open");
+                loadAccountPage(user);
+                sessionStorage.setItem("user id", user.userId);
+            })
+        } else {
+            alert("You must fill in all the fields");
+        }
+    }
+
+    async function loadAccountPage(user) {
+        contentDiv.innerHTML = "";
+        contentDiv.style.display = "flex";
+        contentDiv.style.flexDirection = "column";
+
+        const accountPageHeader = document.createElement("h2");
+        accountPageHeader.innerText = "Welcome " + user.firstName + " " + user.lastName;
+        accountPageHeader.style.width = "100%";
+        accountPageHeader.style.backgroundColor = greyBackground;
+        accountPageHeader.style.textAlign = "center";
+        accountPageHeader.style.padding = "10px";
+        accountPageHeader.style.marginBottom = "20px";
+        contentDiv.appendChild(accountPageHeader);
+
+        const leftColumn = document.createElement("div");
+        leftColumn.style.width = "50%";
+        leftColumn.style.display = "flex";
+        leftColumn.style.flexDirection = "column";
+        leftColumn.style.flexWrap = "wrap";
+        leftColumn.style.textAlign = "center";
+        leftColumn.style.margin = "0 10px 20px 20px";
+
+        const leftColumnHeader = document.createElement("h2");
+        leftColumnHeader.innerText = "Account Details";
+        leftColumnHeader.style.backgroundColor = greyBackground;
+        leftColumnHeader.style.width = "100%";
+        leftColumnHeader.style.padding = "10px 0 10px 0";
+        leftColumn.appendChild(leftColumnHeader);
+
+        const accountDetails = document.createElement("table");
+        accountDetails.style.width = "100%";
+        accountDetails.style.fontSize = "150%";
+
+        const usernameRow = document.createElement("tr");
+        usernameRow.style.marginBottom = "40px";
+        const usernameRowLeft = document.createElement("td");
+        usernameRow.style.backgroundColor = greyBackground;
+        usernameRowLeft.innerText = "Username : ";
+        const usernameRowRight = document.createElement("td");
+        usernameRowRight.innerText = user.username;
+        usernameRow.append(usernameRowLeft, usernameRowRight);
+        accountDetails.appendChild(usernameRow);
+
+        const nameRow = document.createElement("tr");
+        nameRow.style.backgroundColor = greyBackground;
+        nameRow.style.marginBottom = "20px";
+        const nameRowLeft = document.createElement("td");
+        nameRowLeft.innerText = "Name : ";
+        const nameRowRight = document.createElement("td");
+        nameRowRight.innerText = user.firstName + " " + user.lastName;
+        nameRow.append(nameRowLeft, nameRowRight);
+        accountDetails.appendChild(nameRow);
+
+        const emailRow = document.createElement("tr");
+        emailRow.style.marginBottom = "20px";
+        emailRow.style.backgroundColor = greyBackground;
+        const emailRowLeft = document.createElement("td");
+        emailRowLeft.innerText = "Email : ";
+        const emailRowRight = document.createElement("td");
+        emailRowRight.innerText = user.email;
+        emailRow.append(emailRowLeft, emailRowRight);
+        accountDetails.appendChild(emailRow);
+
+        const passwordRow = document.createElement("tr");
+        passwordRow.style.marginBottom = "20px";
+        passwordRow.style.backgroundColor = greyBackground;
+        const passwordRowLeft = document.createElement("td");
+        passwordRowLeft.innerText = "Password : ";
+        const passwordRowRight = document.createElement("td");
+        passwordRowRight.innerText = "***********";
+        passwordRow.append(passwordRowLeft, passwordRowRight);
+        accountDetails.appendChild(passwordRow);
+
+        leftColumn.appendChild(accountDetails);
+
+        const editBtnDiv = document.createElement("div");
+        editBtnDiv.style.width = "100%";
+        editBtnDiv.style.textAlign = "center";
+        editBtnDiv.style.padding = "10px 0 10px 0";
+        editBtnDiv.style.backgroundColor = greyBackground;
+
+        const editBtn = document.createElement("button");
+        editBtn.type = "button";
+        editBtn.innerText = "Edit Details";
+        editBtnDiv.appendChild(editBtn);
+
+        leftColumn.appendChild(editBtnDiv);
+
+        contentDiv.appendChild(leftColumn);
+
+        editBtn.addEventListener("click", () => {
+
+            emailRowRight.innerHTML = "";
+            const email = document.createElement("input");
+            email.value = user.email;
+            emailRowRight.appendChild(email);
+
+            passwordRowRight.innerHTML = "";
+            const oldPassword = document.createElement("input");
+            oldPassword.placeholder = "Current Password";
+            oldPassword.type = "password";
+            oldPassword.style.display = "block";
+            oldPassword.style.marginBottom = "5px";
+            
+            const newPassword = document.createElement("input");
+            newPassword.placeholder = "New Password";
+            newPassword.type = "password";
+            newPassword.style.display = "block";
+            newPassword.style.marginBottom = "5px";
+
+            const repeatPassword = document.createElement("input");
+            repeatPassword.placeholder = "Repeat New Password";
+            repeatPassword.type = "password";
+            repeatPassword.style.display = "block";
+            repeatPassword.style.marginBottom = "5px";
+            passwordRowRight.append(oldPassword, newPassword, repeatPassword);
+
+            editBtnDiv.innerHTML = "";
+            const confirmEditBtn = document.createElement("button");
+            confirmEditBtn.type = "button";
+            confirmEditBtn.innerText = "Confirm Changes";
+            editBtnDiv.appendChild(confirmEditBtn);
+            confirmEditBtn.addEventListener("click", () => confirmEditBtnEventListener(user, user.firstName, user.lastName, user.username, email.value, oldPassword.value, newPassword.value, repeatPassword.value));
+        })
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.innerText = "Delete Account";
+        deleteBtn.style.marginLeft = "15px";
+        editBtnDiv.appendChild(deleteBtn);
+
+        deleteBtn.addEventListener("click", async () => {
+
+            const confirmationDialog = document.createElement("dialog");
+            confirmationDialog.style.textAlign = "center";
+
+            const confirmationDialogHeader = document.createElement("h2");
+            confirmationDialogHeader.innerText = "Enter Your Password";
+
+            const confirmationDialogInput = document.createElement("input");
+            confirmationDialogInput.type = "password";
+            confirmationDialogInput.style.display = "block";
+            confirmationDialogInput.style.marginBottom = "10px";
+            
+            const confirmButton = document.createElement("button");
+            confirmButton.innerText = "Confirm";
+            confirmButton.style.borderRadius = "15px";
+            confirmButton.style.border = "none";
+            confirmButton.style.marginBottom = "5px";
+            confirmButton.style.marginRight = "5px";
+            confirmButton.style.fontSize = "Large"; 
+            confirmButton.style.padding = "10px";
+            confirmButton.style.cursor = "pointer";
+            confirmButton.addEventListener("click", async () => {
+                
+                const userConfirmation = window.confirm("Are you sure? You will lose all your purchased episodes!!");
+
+                if(userConfirmation) {
+                    await fetch("http://localhost:8080/api/user/delete-user-account", {
+                        method: "DELETE",
+                        headers: {
+                            "Content-type": "application/json",
+                            "username": user.username,
+                            "password": confirmationDialogInput.value
+                        }
+                    }).then(res => res.text())
+                    .then(data => {
+                        console.log(data);
+                        confirmationDialog.removeAttribute("open");
+                        loadHomePage();
+                    })
+                } 
+                
+            })
+            confirmButton.addEventListener("mouseenter", () => {
+                confirmButton.style.backgroundColor = "grey";
+            })
+            
+            confirmButton.addEventListener("mouseleave", () => {
+                confirmButton.style.backgroundColor = "";
+            })
+            
+            const cancelButton = document.createElement("button");
+            cancelButton.innerText = "Cancel";
+            cancelButton.style.borderRadius = "15px";
+            cancelButton.style.border = "none";
+            cancelButton.style.marginBottom = "5px";
+            cancelButton.style.fontSize = "Large"; 
+            cancelButton.style.padding = "10px";
+            cancelButton.style.cursor = "pointer";
+            cancelButton.addEventListener("click", () => {
+                confirmationDialog.removeAttribute("open");
+            })
+            cancelButton.addEventListener("mouseenter", () => {
+                cancelButton.style.backgroundColor = "grey";
+            })
+            
+            cancelButton.addEventListener("mouseleave", () => {
+                cancelButton.style.backgroundColor = "";
+            })
+            
+
+            confirmationDialog.append(confirmationDialogHeader, confirmationDialogInput, confirmButton, cancelButton);
+            confirmationDialog.setAttribute("open", true);
+            contentDiv.appendChild(confirmationDialog);
+
+        })
+    }
+
+    async function confirmEditBtnEventListener(user, firstName, lastName, username, email, oldPassword, newPassword, repeatPassword) {
+
+        if(newPassword == repeatPassword) {
+            await fetch("http://localhost:8080/api/user/edit-user-account", {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "username": username,
+                    "password": oldPassword
+                },
+                body: JSON.stringify({
+                    "username": username,
+                    "firstName": firstName,
+                    "lastName": lastName,
+                    "email": email,
+                    "password": newPassword
+                })
+            }).then(res => res.json())
+            .then(user => {
+                console.log(user);
+                loadAccountPage(user);
+            })
+        } else {
+            alert("Your new passwords didn't match!");
+            loadAccountPage(user);
+        }
+    }
+
+    async function loadLoginForm() {
+        const loginDialog = document.createElement("dialog");
+        loginDialog.style.textAlign = "center";
+
+        const loginDialogHeader = document.createElement("h2");
+        loginDialogHeader.innerText = "Log in to your account";
+        loginDialogHeader.style.padding = "10px 0 10px 0";
+
+        loginDialog.appendChild(loginDialogHeader);
+
+        const usernameInput = document.createElement("input");
+        usernameInput.placeholder = "Username";
+        usernameInput.style.marginBottom = "10px";
+        usernameInput.style.display = "block";
+
+        const passwordInput = document.createElement("input");
+        passwordInput.placeholder = "Password";
+        passwordInput.style.marginBottom = "10px";
+        passwordInput.style.display = "block";
+        passwordInput.type = "password";
+
+        const loginButton = document.createElement("button");
+        loginButton.innerText = "Login";
+        loginButton.style.borderRadius = "15px";
+        loginButton.style.border = "none";
+        loginButton.style.marginBottom = "5px";
+        loginButton.style.marginRight = "5px";
+        loginButton.style.fontSize = "Large"; 
+        loginButton.style.padding = "10px";
+        loginButton.style.cursor = "pointer";
+        loginButton.addEventListener("click", async () => {
+
+            await fetch("http://localhost:8080/api/user/login", {
+                method: "GET",
+                headers: {
+                    "ContentType": "application/json",
+                    "username": usernameInput.value,
+                    "password": passwordInput.value
+                }
+            }).then(res => res.json())
+            .then(user => {
+                loadAccountPage(user);
+            })
+        })
+        loginButton.addEventListener("mouseenter", () => {
+            loginButton.style.backgroundColor = "grey";
+        })
+        
+        loginButton.addEventListener("mouseleave", () => {
+            loginButton.style.backgroundColor = "";
+        })
+        
+        const cancelButton = document.createElement("button");
+        cancelButton.innerText = "Cancel";
+        cancelButton.style.borderRadius = "15px";
+        cancelButton.style.border = "none";
+        cancelButton.style.marginBottom = "5px";
+        cancelButton.style.fontSize = "Large"; 
+        cancelButton.style.padding = "10px";
+        cancelButton.style.cursor = "pointer";
+        cancelButton.addEventListener("click", () => {
+            loginDialog.removeAttribute("open");
+        })
+        cancelButton.addEventListener("mouseenter", () => {
+            cancelButton.style.backgroundColor = "grey";
+        })
+        
+        cancelButton.addEventListener("mouseleave", () => {
+            cancelButton.style.backgroundColor = "";
+        })
+        
+        loginDialog.append(usernameInput, passwordInput, loginButton, cancelButton);
+        contentDiv.appendChild(loginDialog);
+        loginDialog.setAttribute("open", true);
+
+
+    }
 })
