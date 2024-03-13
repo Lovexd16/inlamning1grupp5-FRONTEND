@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const podcastLink = document.getElementById("podcastsLink");
     const merchandiseLink = document.getElementById("merchandiseLink");
     const contactLink = document.getElementById("contactLink");
-
     const greyBackground = "rgba(211, 211, 211, 0.3)";
+    sessionStorage.setItem("purchase", "");
 
     homeLink.addEventListener("click", () => {
         loadHomePage();
@@ -35,7 +35,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadCreateAccountForm();
     })
 
-
+    if (localStorage.getItem("purchase") == "") {
+        console.log("here: " + purchaseSuccessful);
+    } else {
+        console.log("start");
+    }
 
 
     const publicKey = await fetch("http://localhost:8080/api/customer/stripe/get-public-key")
@@ -163,7 +167,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const buyButton = document.createElement("button");
             buyButton.type = "button";
-            buyButton.addEventListener("click", () => createBuyButton(product.id)); 
+            buyButton.addEventListener("click", () => createBuyButton(product)); 
             buyButton.style.borderRadius = "15px";
             buyButton.innerText = "Buy Episode";
             buyButton.style.border = "none";
@@ -330,10 +334,58 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     }
 
-    function createBuyButton(productId) {
+    async function createBuyButton(product) {
 
-            console.log("YEY!");
+        const paymentWindow = document.createElement("dialog");
+        paymentWindow.style.background = "url('" + product.images[0] + "')";
+        paymentWindow.style.backgroundSize = "cover";
+        paymentWindow.style.backgroundRepeat = "no-repeat";
+        paymentWindow.style.backgroundPosition = "center";
+        console.log(product);
+        paymentWindow.style.color = "white";
+        const paymentWindowHeader = document.createElement("h2");
+        paymentWindowHeader.innerText = "You are about to purchase " + product.name + "!";
+        paymentWindow.appendChild(paymentWindowHeader);
+        paymentWindow.setAttribute("open", true);
+        window.scrollTo(top);
         
+        const loginChoice = document.createElement("div");
+        loginChoice.style.width = "100%";
+        loginChoice.style.textAlign = "center";
+        const loginChoiceHeader = document.createElement("h3");
+        loginChoiceHeader.innerText = "Would you like to log in or buy as guest?";
+        loginChoiceHeader.style.width = "100%";
+        const loginBtn = document.createElement("button");
+        loginBtn.innerText = "Log in";
+        loginBtn.style.marginRight = "30px"
+        const guestBtn = document.createElement("button");
+        guestBtn.innerText = "Guest";
+        loginChoice.append(loginChoiceHeader, loginBtn, guestBtn);
+        paymentWindow.appendChild(loginChoice);
+        loginBtn.addEventListener("click", () => loginBtnEventListener(product, paymentWindow, loginChoice));
+        guestBtn.addEventListener("click", () => guestgBtnEventListener(product, paymentWindow, loginChoice));
+
+        const cancelButton = document.createElement("button");
+        cancelButton.innerText = "Cancel";
+        cancelButton.style.borderRadius = "15px";
+        cancelButton.style.border = "none";
+        cancelButton.style.marginBottom = "5px";
+        cancelButton.style.fontSize = "Large"; 
+        cancelButton.style.padding = "10px";
+        cancelButton.style.cursor = "pointer";
+        cancelButton.addEventListener("click", () => {
+            paymentWindow.removeAttribute("open");
+        })
+        cancelButton.addEventListener("mouseenter", () => {
+            cancelButton.style.backgroundColor = "grey";
+        })
+    
+        cancelButton.addEventListener("mouseleave", () => {
+            cancelButton.style.backgroundColor = "";
+        })
+
+        paymentWindow.appendChild(cancelButton);
+        contentDiv.appendChild(paymentWindow);
     }
 
     async function showRightColumn() {
@@ -428,6 +480,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const episodeDiv = document.createElement("div");
                 episodeDiv.style.width = "20%";
+                episodeDiv.style.textAlign = "center";
                 episodeDiv.style.maxWidth = "100%";
                 episodeDiv.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
                 episodeDiv.style.padding = "3px";
@@ -477,7 +530,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             products.data.reverse();
             
-            products.data.forEach(element => {
+            products.data.forEach(async element => {
                 
                 let productName = element.name.substring(0, 9);
 
@@ -486,10 +539,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                     paidEpisodeDiv.style.width = "20%";
                     const paidEpisodeDivHeader = document.createElement("div");
                     const paidEpisodeDivHeaderText = document.createElement("h3");
+                    const paidEpisodeDivHeaderPrice = document.createElement("h2");
+
+                    await fetch("http://localhost:8080/api/customer/stripe/get-product-price", {
+                        method: "GET",
+                        headers: {
+                            "priceId": element.defaultPrice
+                        }
+                    }).then(res => res.json())
+                    .then(price => {
+                        console.log(price);
+                        paidEpisodeDivHeaderPrice.innerText = (price.unitAmount / 100) + " " + price.currency;
+                    })
+
                     paidEpisodeDivHeaderText.style.paddingTop = "14px";
-                    paidEpisodeDiv.style.backgroundColor = "rgba(211, 211, 211, 0.3)"
+                    paidEpisodeDiv.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
                     paidEpisodeDivHeaderText.innerText = element.name;
-                    paidEpisodeDivHeader.appendChild(paidEpisodeDivHeaderText);
+                    paidEpisodeDivHeader.append(paidEpisodeDivHeaderText, paidEpisodeDivHeaderPrice);
                     paidEpisodeDiv.appendChild(paidEpisodeDivHeader);
         
                     paidEpisodeDiv.style.textAlign = "center";
@@ -500,7 +566,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
                     const buyButton = document.createElement("button");
                     buyButton.type = "button";
-                    buyButton.addEventListener("click", () => createBuyButton(element.id)); 
+                    buyButton.addEventListener("click", () => createBuyButton(element)); 
                     buyButton.style.borderRadius = "15px";
                     buyButton.innerText = "Buy Episode";
                     buyButton.style.border = "none";
@@ -518,7 +584,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     })
         
                     paidEpisodeDiv.appendChild(buyButton);
-        
                     paidContentDivPodcasts.appendChild(paidEpisodeDiv);  
                 }
         
@@ -528,8 +593,229 @@ document.addEventListener('DOMContentLoaded', async () => {
         })
     }
 
-    async function loadMerchandisePage() {
+    async function loginBtnEventListener(paymentWindow) {
+
+    }
+
+    async function guestgBtnEventListener(product, paymentWindow, loginChoice) {
+        loginChoice.innerHTML = "";
+        const guestHeader = document.createElement("h3");
+        guestHeader.innerText = "Guest";
+        const guestForm = document.createElement("form");
+        guestForm.style.textAlign = "center";
+        guestForm.style.display = "inline";
+        const guestFormFirstName = document.createElement("input");
+        guestFormFirstName.placeholder = "First Name";
+        guestFormFirstName.style.display = "block";
+        guestFormFirstName.setAttribute("required", true);
+        const guestFormLastName = document.createElement("input");
+        guestFormLastName.placeholder = "Last Name";
+        guestFormLastName.style.display = "block";
+        guestFormLastName.setAttribute("required", true);
+        const guestFormEmail = document.createElement("input");
+        guestFormEmail.placeholder = "@email";
+        guestFormEmail.type = "email";
+        guestFormEmail.style.display = "block";
+        guestFormEmail.setAttribute("required", true);
+        const guestFormAddress1 = document.createElement("input");
+        guestFormAddress1.placeholder = "Address 1";
+        guestFormAddress1.style.display = "block";
+        guestFormAddress1.setAttribute("required", true);
+        const guestFormAddress2 = document.createElement("input");
+        guestFormAddress2.placeholder = "Address 2";
+        guestFormAddress2.style.display = "block";
+        const guestFormPostNumber = document.createElement("input");
+        guestFormPostNumber.placeholder = "Post Number";
+        guestFormPostNumber.style.display = "block";
+        guestFormPostNumber.setAttribute("required", true);
+        const guestFormCity = document.createElement("input");
+        guestFormCity.placeholder = "City";
+        guestFormCity.style.display = "block";
+        guestFormCity.setAttribute("required", true);
+        const submitBtn = document.createElement("button");
+        submitBtn.type = "button";
+        submitBtn.innerText = "Submit";
         
+        guestForm.append(guestFormFirstName, guestFormLastName, guestFormEmail, guestFormAddress1, guestFormAddress2, guestFormPostNumber, guestFormCity, submitBtn);
+        loginChoice.appendChild(guestForm);
+        
+        submitBtn.addEventListener("click", async (e) => {
+
+            if(guestFormFirstName.value.trim() != "" && guestFormLastName.value.trim() != "" && guestFormEmail.value.trim() != "" && guestFormAddress1.value.trim() != "" && guestFormPostNumber.value.trim() != "" && guestFormCity.value.trim() != "") {
+
+                e.preventDefault();
+                loginChoice.innerHTML = "";
+                let paymentElement = document.createElement("div");
+                paymentElement.id = "paymentElement";
+                loginChoice.appendChild(paymentElement);
+    
+                console.log(product.id);
+                const {clientSecret} = await fetch("http://localhost:8080/api/customer/stripe/one-time-purchase", {
+                method: "POST",
+                headers:{
+                    "Content-Type": "application/json",
+                    "productId": product.id
+                },
+                body : JSON.stringify ({
+                    "firstName": guestFormFirstName.value,
+                    "lastName": guestFormLastName.value,
+                    "email": guestFormEmail.value,
+                    "address1" : guestFormAddress1.value,
+                    "address2": guestFormAddress2.value,
+                    "postnumber": guestFormPostNumber.value,
+                    "city": guestFormCity.value
+                })
+            }).then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return res.json();
+            })
+            .catch(error => {
+                const errorMessage = document.createElement("h2");
+                errorMessage.innerText = "All fields except 'Address 2' are required, including a valid email address.";
+                loginChoice.appendChild(errorMessage);
+            });
+            
+            console.log({clientSecret});
+        
+            const elements = stripe.elements({clientSecret});
+            paymentElement = elements.create('payment');
+            paymentElement.mount('#paymentElement');
+        
+            const paidEpisodeDivHeaderPrice = document.createElement("h2");
+
+                    await fetch("http://localhost:8080/api/customer/stripe/get-product-price", {
+                        method: "GET",
+                        headers: {
+                            "priceId": product.defaultPrice
+                        }
+                    }).then(res => res.json())
+                    .then(price => {
+                        console.log(price);
+                        paidEpisodeDivHeaderPrice.innerText = (price.unitAmount / 100) + " " + price.currency;
+                    })
+            const payBtn = document.createElement("button");
+            payBtn.innerText = "Confirm Payment";
+            loginChoice.append(paidEpisodeDivHeaderPrice, payBtn);
+    
+            payBtn.addEventListener("click", async () => {
+                
+                console.log("click");
+                const {error} = await stripe.confirmPayment({
+                    elements,
+                    confirmParams: {
+                        return_url: `${window.location.origin}/successfulPurchase.html?success=true&productId=${product.id}`
+                    }
+                })
+                if (error) {
+                    const errorMessage = document.createElement("h2");
+                errorMessage.innerText = "Something went wrong, please try again.";
+                loginChoice.appendChild(errorMessage);
+                } 
+            })
+            } else {
+                const errorMessage = document.createElement("h2");
+                alert("All fields except 'Address 2' are required, including a valid email address.");
+                loginChoice.appendChild(errorMessage);
+            }
+        })
+
+
+    }
+
+    async function loadMerchandisePage() {
+
+        contentDiv.innerHTML = "";
+        contentDiv.style.display = "flex";
+        contentDiv.style.flexDirection = "column";
+
+        const paidContentDiv = document.createElement("div");
+        paidContentDiv.style.width = "100vw";
+        paidContentDiv.style.marginBottom = "10px";
+
+        const paidContentDivHeader = document.createElement("h1");
+        paidContentDivHeader.innerText = "Merchandise";
+        paidContentDivHeader.style.width = "100%";
+        paidContentDivHeader.style.backgroundColor = greyBackground;
+        paidContentDivHeader.style.padding = "10px 0 10px 0";
+        paidContentDivHeader.style.textAlign = "center";
+        paidContentDiv.appendChild(paidContentDivHeader);
+
+        const paidContentDivPodcasts = document.createElement("div");
+        paidContentDivPodcasts.style.display = "flex";
+        paidContentDivPodcasts.style.textAlign = "left";
+        paidContentDivPodcasts.style.flexDirection = "row";
+        paidContentDivPodcasts.style.flexWrap = "wrap";
+        paidContentDivPodcasts.style.justifyContent = "left";
+
+        await fetch ("http://localhost:8080/api/customer/stripe/get-all-products") 
+        .then(res => res.json())
+        .then(products => {
+            
+            products.data.forEach(async element => {
+                
+                let productName = element.name.substring(0, 7);
+
+                if (productName != "Podcast") {
+                    const paidEpisodeDiv = document.createElement("div");
+                    paidEpisodeDiv.style.width = "20%";
+                    paidEpisodeDiv.style.marginBottom = "10px";
+                    const paidEpisodeDivHeader = document.createElement("div");
+                    const paidEpisodeDivHeaderText = document.createElement("h3");
+                    const paidEpisodeDivHeaderPrice = document.createElement("h2");
+
+                    await fetch("http://localhost:8080/api/customer/stripe/get-product-price", {
+                        method: "GET",
+                        headers: {
+                            "priceId": element.defaultPrice
+                        }
+                    }).then(res => res.json())
+                    .then(price => {
+                        console.log(price);
+                        paidEpisodeDivHeaderPrice.innerText = (price.unitAmount / 100) + " " + price.currency;
+                    })
+
+                    paidEpisodeDivHeaderText.style.paddingTop = "14px";
+                    paidEpisodeDiv.style.backgroundColor = "rgba(211, 211, 211, 0.3)";
+                    paidEpisodeDivHeaderText.innerText = element.name;
+                    paidEpisodeDivHeader.append(paidEpisodeDivHeaderText, paidEpisodeDivHeaderPrice);
+                    paidEpisodeDiv.appendChild(paidEpisodeDivHeader);
+        
+                    paidEpisodeDiv.style.textAlign = "center";
+                    const paidEpisodeImage = document.createElement("img");
+                    paidEpisodeImage.src = element.images[0];
+                    paidEpisodeImage.style.width = "95%";
+                    paidEpisodeImage.style.height = "400px";
+                    paidEpisodeDiv.appendChild(paidEpisodeImage);
+        
+                    const buyButton = document.createElement("button");
+                    buyButton.type = "button";
+                    buyButton.addEventListener("click", () => createBuyButton(element)); 
+                    buyButton.style.borderRadius = "15px";
+                    buyButton.innerText = "Buy";
+                    buyButton.style.border = "none";
+                    buyButton.style.marginBottom = "5px";
+                    buyButton.style.fontSize = "Large"; 
+                    buyButton.style.padding = "10px";
+                    buyButton.style.cursor = "pointer";
+                    
+                    buyButton.addEventListener("mouseenter", () => {
+                        buyButton.style.backgroundColor = "grey";
+                    })
+                
+                    buyButton.addEventListener("mouseleave", () => {
+                        buyButton.style.backgroundColor = "";
+                    })
+        
+                    paidEpisodeDiv.appendChild(buyButton);
+                    paidContentDivPodcasts.appendChild(paidEpisodeDiv);  
+                }
+        
+            });
+            paidContentDiv.appendChild(paidContentDivPodcasts);
+            contentDiv.appendChild(paidContentDiv);
+        })
     }
 
 })
