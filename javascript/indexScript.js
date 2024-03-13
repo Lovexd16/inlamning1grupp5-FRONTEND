@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     const subscribeDiv = document.getElementById("subscribeDiv");
     const createAccountLink = document.getElementById("createAccountLink");
-    const loginLink = document.getElementById("loginLink");
+    const memberPage = document.getElementById("loginLink");
     const contentDiv = document.getElementById("contentDiv");
     const homeLink = document.getElementById("homeLink");
     const podcastLink = document.getElementById("podcastsLink");
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadContactPage();
     })
 
-    loginLink.addEventListener("click", () => {
+    memberPage.addEventListener("click", () => {
         loadLoginForm();
     })
 
@@ -52,12 +52,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     subscribeDiv.addEventListener("mouseenter", () => {
         createAccountLink.style.textDecoration = "underline";
-        loginLink.style.textDecoration = "underline";
+        memberPage.style.textDecoration = "underline";
     })
 
     subscribeDiv.addEventListener("mouseleave", () => {
         createAccountLink.style.textDecoration = "";
-        loginLink.style.textDecoration = "";
+        memberPage.style.textDecoration = "";
     })
 
     await loadHomePage();
@@ -816,6 +816,107 @@ document.addEventListener('DOMContentLoaded', async () => {
             paidContentDiv.appendChild(paidContentDivPodcasts);
             contentDiv.appendChild(paidContentDiv);
         })
+    }
+
+    async function loadCreateAccountForm() {
+        const createAccountDialog = document.createElement("dialog");
+        createAccountDialog.style.textAlign = "center";
+
+        const createAccountHeader = document.createElement("h2");
+        createAccountHeader.innerText = "Create Account";
+        createAccountDialog.appendChild(createAccountHeader);
+
+        createAccountDialog.setAttribute("open", true);
+
+        const createForm = document.createElement("form");
+        createForm.style.display = "inline";
+
+        const firstNameInput = document.createElement("input");
+        firstNameInput.placeholder = "First Name";
+        firstNameInput.setAttribute("Reqiured", true);
+        firstNameInput.style.display = "block";
+
+        const lastNameInput = document.createElement("input");
+        lastNameInput.placeholder = "Last Name";
+        lastNameInput.setAttribute("Reqiured", true);
+        lastNameInput.style.display = "block";
+
+        const emailInput = document.createElement("input");
+        emailInput.placeholder = "@email";
+        emailInput.setAttribute("Reqiured", true);
+        emailInput.type = "email";
+        emailInput.style.display = "block";
+
+        const usernameInput = document.createElement("input");
+        usernameInput.placeholder = "Username (5 - 15 char)";
+        usernameInput.setAttribute("Reqiured", true);
+        usernameInput.setAttribute("Min", 5);
+        usernameInput.setAttribute("Max", 15);
+        usernameInput.style.display = "block";
+
+        const passwordInput = document.createElement("input");
+        passwordInput.placeholder = "password (8 - 20 char)";
+        passwordInput.setAttribute("Min", 8);
+        passwordInput.setAttribute("Max", 20);
+        passwordInput.type = "password";
+        passwordInput.style.display = "block";
+
+        const createButton = document.createElement("button");
+        createButton.type = "submit";
+        createButton.innerText = "Create Account";
+
+        
+        createForm.append(firstNameInput, lastNameInput, emailInput, usernameInput, passwordInput, createButton);
+        createAccountDialog.appendChild(createForm);
+
+        
+        const cancelButton = document.createElement("button");
+        cancelButton.innerText = "Cancel";
+        cancelButton.style.borderRadius = "15px";
+        cancelButton.style.border = "none";
+        cancelButton.style.marginBottom = "5px";
+        cancelButton.style.fontSize = "Large"; 
+        cancelButton.style.padding = "10px";
+        cancelButton.style.cursor = "pointer";
+
+        cancelButton.addEventListener("click", () => {
+            createAccountDialog.removeAttribute("open");
+        })
+        cancelButton.addEventListener("mouseenter", () => {
+            cancelButton.style.backgroundColor = "grey";
+        })
+        
+        cancelButton.addEventListener("mouseleave", () => {
+            cancelButton.style.backgroundColor = "";
+        })
+        
+        createAccountDialog.appendChild(cancelButton);
+        contentDiv.appendChild(createAccountDialog);
+        createButton.addEventListener("click", (e) => createButtonEventListener(createAccountDialog, e, firstNameInput.value, lastNameInput.value, emailInput.value, usernameInput.value, passwordInput.value))
+    }
+
+    async function createButtonEventListener(createAccountDialog, e, firstNameInput, lastNameInput, emailInput, usernameInput, passwordInput) {
+
+        e.preventDefault();
+        console.log(firstNameInput + lastNameInput, emailInput, usernameInput, passwordInput)
+        await fetch("http://localhost:8080/api/user/create-user-account", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                "firstName": firstNameInput,
+                "lastName": lastNameInput,
+                "email": emailInput,
+                "username": usernameInput,
+                "password": passwordInput
+            })
+        }).then(res => res.json())
+        .then(user => {
+            console.log(user);
+            createAccountDialog.removeAttribute("open");
+        })
+
     }
 
 })
