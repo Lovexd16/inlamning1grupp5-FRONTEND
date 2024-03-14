@@ -1151,6 +1151,60 @@ document.addEventListener('DOMContentLoaded', async () => {
         accountPageHeader.style.marginBottom = "20px";
         contentDiv.appendChild(accountPageHeader);
 
+        let userId = sessionStorage.getItem("userID");
+        console.log(userId);
+                
+        if (userId && userId.trim().length > 0) {
+            
+            await fetch("http://localhost:8080/api/user/get-user-by-id", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "userId": userId 
+                }
+            }).then(res => res.json())
+            .then(user => {
+                if (user.subscribed == "Not subscribed") {
+                    const subscribeBtnDiv = document.createElement("div");
+                    const subscribeBtn = document.createElement("button");
+                    subscribeBtnDiv.style.width = "100%";
+                    subscribeBtnDiv.style.backgroundColor = greyBackground;
+                    subscribeBtnDiv.style.textAlign = "center";
+                    subscribeBtnDiv.style.padding = "10px";
+                    subscribeBtnDiv.style.marginBottom = "20px";
+                
+                    subscribeBtn.innerText = "Subscribe!";
+                    subscribeBtn.style.fontSize = "200%";
+
+                    subscribeBtn.addEventListener("click", () => subscribeBtnEventListener(user));
+                
+                    subscribeBtnDiv.appendChild(subscribeBtn);
+                    contentDiv.appendChild(subscribeBtnDiv);
+                } else {
+                    const subscribeBtnDiv = document.createElement("div");
+                    const subscribedText = document.createElement("h2");
+                    subscribeBtnDiv.style.width = "100%";
+                    subscribeBtnDiv.style.backgroundColor = greyBackground;
+                    subscribeBtnDiv.style.textAlign = "center";
+                    subscribeBtnDiv.style.padding = "10px";
+                    subscribeBtnDiv.style.marginBottom = "20px";
+                
+                    subscribedText.innerText = "You are subscribed!";
+                    subscribedText.style.fontSize = "200%";
+                
+                    subscribeBtnDiv.appendChild(subscribedText);
+                    contentDiv.appendChild(subscribeBtnDiv);
+                }
+            })
+        }
+        logOutLink.addEventListener("click", () => {
+            console.log("clickL");
+            sessionStorage.removeItem("userID");
+            loadHomePage();
+        
+    })
+            
+
         const leftColumn = document.createElement("div");
         leftColumn.style.width = "50%";
         leftColumn.style.display = "flex";
@@ -1455,5 +1509,171 @@ document.addEventListener('DOMContentLoaded', async () => {
     function isUUID(userId) {
         const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
         return uuidPattern.test(userId);
+    }
+
+    async function subscribeBtnEventListener(user) {
+        const paymentWindow = document.createElement("dialog");
+        paymentWindow.style.color = "black";
+        const paymentWindowHeader = document.createElement("h2");
+        paymentWindowHeader.innerText = "You are about to purchase a subscription!";
+        paymentWindow.appendChild(paymentWindowHeader);
+        paymentWindow.setAttribute("open", true);
+        window.scrollTo(top);
+        const loginChoice = document.createElement("div");
+        loginChoice.style.width = "100%";
+        loginChoice.style.textAlign = "center";
+        const loginChoiceHeader = document.createElement("h3");
+
+        loginChoiceHeader.innerText = "You are logged in as " + user.username + "\nEnter your password to continue to purchase.";
+        loginChoiceHeader.style.width = "100%";
+        const password = document.createElement("input");
+        password.type = "password";
+        password.style.display = "block";
+        const loginBtn = document.createElement("button");
+        loginBtn.innerText = "Confirm";
+        loginBtn.style.marginRight = "30px"
+        loginChoice.append(loginChoiceHeader, password, loginBtn);
+        paymentWindow.appendChild(loginChoice);
+
+        const cancelButton = document.createElement("button");
+        cancelButton.innerText = "Cancel";
+        cancelButton.style.borderRadius = "15px";
+        cancelButton.style.border = "none";
+        cancelButton.style.marginBottom = "5px";
+        cancelButton.style.fontSize = "Large"; 
+        cancelButton.style.padding = "10px";
+        cancelButton.style.cursor = "pointer";
+        cancelButton.addEventListener("click", () => {
+            paymentWindow.removeAttribute("open");
+        })
+        paymentWindow.appendChild(cancelButton);
+        loginBtn.addEventListener("click", () => subscribeEventListener(paymentWindow, loginChoice, password.value, user));
+
+        contentDiv.appendChild(paymentWindow);
+    }
+    async function subscribeEventListener(paymentWindow, loginChoice, password, user) {
+        loginChoice.innerHTML = "";
+        const memberHeader = document.createElement("h3");
+        memberHeader.innerText = "Member";
+        const memberForm = document.createElement("form");
+        memberForm.style.textAlign = "center";
+        memberForm.style.display = "inline";
+        const memberFormFirstName = document.createElement("h3");
+        memberFormFirstName.innerText = user.firstName;
+        memberFormFirstName.style.display = "block";
+        const memberFormLastName = document.createElement("h3");
+        memberFormLastName.innerText = user.lastName;
+        memberFormLastName.style.display = "block";
+        const memberFormEmail = document.createElement("h3");
+        memberFormEmail.innerText = user.email;
+        memberFormEmail.type = "email";
+        memberFormEmail.style.display = "block";
+        const memberFormAddress1 = document.createElement("input");
+        memberFormAddress1.placeholder = "Address 1";
+        memberFormAddress1.style.display = "block";
+        memberFormAddress1.setAttribute("required", true);
+        const memberFormAddress2 = document.createElement("input");
+        memberFormAddress2.placeholder = "Address 2";
+        memberFormAddress2.style.display = "block";
+        const memberFormPostNumber = document.createElement("input");
+        memberFormPostNumber.placeholder = "Post Number";
+        memberFormPostNumber.style.display = "block";
+        memberFormPostNumber.setAttribute("required", true);
+        const memberFormCity = document.createElement("input");
+        memberFormCity.placeholder = "City";
+        memberFormCity.style.display = "block";
+        memberFormCity.setAttribute("required", true);
+        const submitBtn = document.createElement("button");
+        submitBtn.type = "button";
+        submitBtn.innerText = "Submit";
+        
+        memberForm.append(memberFormFirstName, memberFormLastName, memberFormEmail, memberFormAddress1, memberFormAddress2, memberFormPostNumber, memberFormCity, submitBtn);
+        loginChoice.appendChild(memberForm);
+        
+        submitBtn.addEventListener("click", async (e) => {
+
+            if(memberFormAddress1.value.trim() != "" && memberFormPostNumber.value.trim() != "" && memberFormCity.value.trim() != "") {
+
+                e.preventDefault();
+                loginChoice.innerHTML = "";
+                let paymentElement = document.createElement("div");
+                paymentElement.id = "paymentElement";
+                loginChoice.appendChild(paymentElement);
+                
+                console.log(user.username, password, memberFormFirstName.innerText, memberFormLastName.innerText, memberFormEmail.innerText, 
+                    memberFormAddress1.value, memberFormAddress2.value, memberFormPostNumber.value, memberFormCity.value);
+
+                const {clientSecret} = await fetch("http://localhost:8080/api/customer/stripe/activate-subscription", {
+                method: "POST",
+                headers:{
+                    "Content-Type": "application/json",
+                    "productId": "prod_PgRCdpWdFlXZyw",
+                    "username": user.username,
+                    "password": password
+                },
+                body : JSON.stringify ({
+                    "firstName": memberFormFirstName.innerText,
+                    "lastName": memberFormLastName.innerText,
+                    "email": memberFormEmail.innerText,
+                    "address1" : memberFormAddress1.value,
+                    "address2": memberFormAddress2.value,
+                    "postnumber": memberFormPostNumber.value,
+                    "city": memberFormCity.value
+                })
+            }).then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return res.json();
+            })
+            .catch(error => {
+                const errorMessage = document.createElement("h2");
+                errorMessage.innerText = "All fields except 'Address 2' are required, including a valid email address.";
+                loginChoice.appendChild(errorMessage);
+            });
+            
+            console.log({clientSecret});
+        
+            const elements = stripe.elements({clientSecret});
+            paymentElement = elements.create('payment');
+            paymentElement.mount('#paymentElement');
+        
+            const paidEpisodeDivHeaderPrice = document.createElement("h2");
+
+                    await fetch("http://localhost:8080/api/customer/stripe/get-product-price", {
+                        method: "GET",
+                        headers: {
+                            "priceId": "price_1Or4KYG7YXGZMv5OBkzsK5KY"
+                        }
+                    }).then(res => res.json())
+                    .then(price => {
+                        console.log(price);
+                        paidEpisodeDivHeaderPrice.innerText = (price.unitAmount / 100) + " " + price.currency;
+                    })
+            const payBtn = document.createElement("button");
+            payBtn.innerText = "Confirm Payment";
+            loginChoice.append(paidEpisodeDivHeaderPrice, payBtn);
+    
+            payBtn.addEventListener("click", async () => {
+                
+                console.log("click");
+                const {error} = await stripe.confirmPayment({
+                    elements,
+                    confirmParams: {
+                        return_url: `${window.location.origin}/successfulPurchase.html?success=true&productId=prod_PgRCdpWdFlXZyw`
+                    }
+                })
+                if (error) {
+                    const errorMessage = document.createElement("h2");
+                errorMessage.innerText = "Something went wrong, please try again.";
+                loginChoice.appendChild(errorMessage);
+                } 
+            })
+            } else {
+                const errorMessage = document.createElement("h2");
+                alert("All fields except 'Address 2' are required, including a valid email address.");
+                loginChoice.appendChild(errorMessage);
+            }
+        })
     }
 })
