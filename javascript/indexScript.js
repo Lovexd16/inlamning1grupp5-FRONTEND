@@ -1140,7 +1140,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         checkLoggedIn();
         contentDiv.innerHTML = "";
         contentDiv.style.display = "flex";
-        contentDiv.style.flexDirection = "column";
+        contentDiv.style.flexDirection = "row";
+        contentDiv.style.flexWrap = "wrap";
+        contentDiv.style.justifyContent = "space-between";
 
         const accountPageHeader = document.createElement("h2");
         accountPageHeader.innerText = "Welcome " + user.firstName + " " + user.lastName;
@@ -1203,8 +1205,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             loadHomePage();
         
     })
-            
-
+        
+        
         const leftColumn = document.createElement("div");
         leftColumn.style.width = "50%";
         leftColumn.style.display = "flex";
@@ -1212,14 +1214,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         leftColumn.style.flexWrap = "wrap";
         leftColumn.style.textAlign = "center";
         leftColumn.style.margin = "0 10px 20px 20px";
-
+        
         const leftColumnHeader = document.createElement("h2");
         leftColumnHeader.innerText = "Account Details";
         leftColumnHeader.style.backgroundColor = greyBackground;
         leftColumnHeader.style.width = "100%";
         leftColumnHeader.style.padding = "10px 0 10px 0";
         leftColumn.appendChild(leftColumnHeader);
-
+        
         const accountDetails = document.createElement("table");
         accountDetails.style.width = "100%";
         accountDetails.style.fontSize = "150%";
@@ -1279,7 +1281,75 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         leftColumn.appendChild(editBtnDiv);
 
-        contentDiv.appendChild(leftColumn);
+        const rightColumnDiv = document.createElement("div");
+        rightColumnDiv.style.width = "45%";
+        rightColumnDiv.style.padding = "0 20px 0 0";
+        const subscribedHeader = document.createElement("h2");
+        subscribedHeader.innerText = "Subscription";
+        subscribedHeader.style.width = "100%";
+        subscribedHeader.style.textAlign = "center";
+        subscribedHeader.style.padding = "10px 0 10px 0";
+        subscribedHeader.style.backgroundColor = greyBackground;
+        rightColumnDiv.appendChild(subscribedHeader);
+
+        const subscribedPodcastsDiv = document.createElement("div");
+        if (user.subscribed != "Not subscribed") {
+            await fetch ("http://localhost:8080/api/customer/stripe/get-all-products") 
+        .then(res => res.json())
+        .then(products => {
+
+            products.data.reverse();
+            
+            products.data.forEach(async element => {
+                
+                let productName = element.name.substring(0, 9);
+
+                if (productName == "Podcast #") {
+                    const paidEpisodeDiv = document.createElement("div");
+                    paidEpisodeDiv.style.width = "100%";
+                    paidEpisodeDiv.style.textAlign = "center";
+                    paidEpisodeDiv.style.padding = "10px 0 10px 0";
+                    paidEpisodeDiv.style.margin = "10px 30px 10px 0";
+                    const paidEpisodeDivHeader = document.createElement("div");
+                    paidEpisodeDivHeader.style.backgroundColor = greyBackground;
+                    const paidEpisodeDivHeaderText = document.createElement("h3");
+                    paidEpisodeDivHeaderText.innerText = element.name;
+                    paidEpisodeDivHeaderText.style.padding = "10px 0 0 10px";
+                    paidEpisodeDivHeader.appendChild(paidEpisodeDivHeaderText);
+                    await fetch("http://localhost:8080/api/podcasts/get-podcast", {
+
+                        method: "GET",
+                        headers: {
+                            "productId": element.id                   
+                        }
+                    }) 
+                    .then(res => res.blob())
+                    .then(podcasts => {
+                        console.log(podcasts);
+                        const audio = new Audio();
+                        audio.src = URL.createObjectURL(podcasts);
+                        audio.style.maxWidth = "100%";
+                        audio.controls = true;
+                        audio.style.width = "98%";
+                        const episodeImg = document.createElement("img");
+                        episodeImg.style.width = "98%";
+                        episodeImg.style.marginLeft = "10px";
+                        episodeImg.src = element.images[0];
+                        paidEpisodeDivHeader.append(episodeImg, audio);
+                    })
+                    rightColumnDiv.appendChild(paidEpisodeDivHeader);
+                }
+            })
+        })
+        } else {
+            const subscribedPodcastsDivHeader = document.createElement("h2");
+            subscribedPodcastsDivHeader.innerText = "You are not subscribed";
+            subscribedPodcastsDivHeader.style.backgroundColor = greyBackground;
+            subscribedPodcastsDivHeader.style.textAlign = "center";
+            subscribedPodcastsDiv.appendChild(subscribedPodcastsDivHeader);
+            rightColumnDiv.appendChild(subscribedPodcastsDiv);
+        }
+        contentDiv.append(leftColumn, rightColumnDiv);
 
         editBtn.addEventListener("click", () => {
 
