@@ -1133,12 +1133,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                     "username": usernameInput,
                     "password": passwordInput
                 })
-            }).then(res => res.json())
-            .then(user => {
-                console.log(user);
-                createAccountDialog.removeAttribute("open");
-                sessionStorage.setItem("userID", user.userId);
-                loadHomePage();
+            }).then(res => {
+                if(res.ok) {
+                    return res.json()
+                } else {
+                    return res.text()
+                }
+            })
+            .then(data => {
+                if (typeof data == 'object') {
+                    console.log(data);
+                    createAccountDialog.removeAttribute("open");
+                    sessionStorage.setItem("userID", data.userId);
+                    loadHomePage();
+                } else {
+                    alert(data);
+                }
             })
         } else {
             alert("You must fill in all the fields");
@@ -1402,7 +1412,74 @@ document.addEventListener('DOMContentLoaded', async () => {
                     rightColumnDiv.appendChild(paidEpisodeDivHeader);
                 }
             })
-        })
+
+            const cancelSubscriptionBtnDiv = document.createElement("div");
+            cancelSubscriptionBtnDiv.style.width = "100%";
+            cancelSubscriptionBtnDiv.style.backgroundColor = "100%";
+            cancelSubscriptionBtnDiv.style.padding = "10px";
+            cancelSubscriptionBtnDiv.style.margin = "10px 10px 30px 10px";
+            cancelSubscriptionBtnDiv.style.textAlign = "center";
+            const cancelSubscriptionBtn = document.createElement("button");
+            cancelSubscriptionBtn.type = "button";
+            cancelSubscriptionBtn.innerText = "Cancel Subscription";
+            cancelSubscriptionBtnDiv.appendChild(cancelSubscriptionBtn);
+            rightColumnDiv.appendChild(cancelSubscriptionBtnDiv);
+            const cancelDialog = document.createElement("dialog");
+            cancelDialog.style.top = "10%";
+            rightColumnDiv.appendChild(cancelDialog);
+            cancelSubscriptionBtn.addEventListener("click", () => {
+                
+                cancelDialog.innerHTML = "";
+                console.log("click");
+                window.scrollTo(top);
+                cancelDialog.style.textAlign = "center";
+                const cancelDialogHeader = document.createElement("h2");
+                cancelDialogHeader.innerText = "Are you sure you want to cancel your subscription?\nIf so, enter your password below.";
+                cancelDialog.appendChild(cancelDialogHeader);
+                const password = document.createElement("input");
+                password.type = "password";
+                password.style.display = "block";
+                const confirmBtn = document.createElement("button");
+                confirmBtn.innerText = "Confirm";
+                confirmBtn.style.marginRight = "30px";
+                const cancelButton = document.createElement("button");
+                cancelButton.innerText = "Cancel";
+                cancelButton.style.borderRadius = "15px";
+                cancelButton.style.border = "none";
+                cancelButton.style.marginBottom = "5px";
+                cancelButton.style.fontSize = "Large"; 
+                cancelButton.style.padding = "10px";
+                cancelButton.style.cursor = "pointer";
+    
+                cancelButton.addEventListener("click", () => {
+                    cancelDialog.removeAttribute("open");
+                })
+                
+                cancelDialog.append(cancelDialogHeader, password, confirmBtn, cancelButton);
+                
+                confirmBtn.addEventListener("click", () => confirmBtnEventListener(password.value, user));
+                cancelDialog.setAttribute("open", true);
+            })
+            
+            async function confirmBtnEventListener(password, username) {
+                console.log(username, password)
+                await fetch("http://localhost:8080/api/customer/stripe/cancel-subscription", {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "username": user.username,
+                        "password": password
+                    }
+                }).then(res => res.text())
+                .then(subscription => {
+                    console.log(subscription);
+                    alert(subscription);
+                    cancelDialog.removeAttribute("open");
+                    loadHomePage();
+                })
+            }
+        }) 
+
         } else {
             const subscribedPodcastsDivHeader = document.createElement("h2");
             subscribedPodcastsDivHeader.innerText = "You are not subscribed";
@@ -1444,7 +1521,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             const confirmEditBtn = document.createElement("button");
             confirmEditBtn.type = "button";
             confirmEditBtn.innerText = "Confirm Changes";
-            editBtnDiv.appendChild(confirmEditBtn);
+            const cancelButton = document.createElement("button");
+            cancelButton.innerText = "Cancel";
+            cancelButton.style.borderRadius = "15px";
+            cancelButton.style.border = "none";
+            cancelButton.style.margin = "0 0 5px 10px";
+            cancelButton.style.fontSize = "Large"; 
+            cancelButton.style.padding = "10px";
+            cancelButton.style.cursor = "pointer";
+            cancelButton.addEventListener("click", () => {
+                loadAccountPage(user);
+            })
+            editBtnDiv.append(confirmEditBtn, cancelButton);
             confirmEditBtn.addEventListener("click", () => confirmEditBtnEventListener(user, user.firstName, user.lastName, user.username, email.value, oldPassword.value, newPassword.value, repeatPassword.value));
         })
 
@@ -1487,11 +1575,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                             "username": user.username,
                             "password": confirmationDialogInput.value
                         }
-                    }).then(res => res.text())
+                    }).then(res => {
+                        if(!res.ok) {
+                            throw new Error("Incorrect Password");
+                        }
+                        return res.text();
+                    })
                     .then(data => {
                         console.log(data);
+                        sessionStorage.removeItem("userID");
                         confirmationDialog.removeAttribute("open");
+                        alert(data);
                         loadHomePage();
+                    })
+                    .catch(error => {
+                        alert(error);
+                        loadAccountPage(user);
                     })
                 } 
                 
@@ -1533,29 +1632,44 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function confirmEditBtnEventListener(user, firstName, lastName, username, email, oldPassword, newPassword, repeatPassword) {
 
-        if(newPassword == repeatPassword) {
-            await fetch("http://localhost:8080/api/user/edit-user-account", {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    "username": username,
-                    "password": oldPassword
-                },
-                body: JSON.stringify({
-                    "username": username,
-                    "firstName": firstName,
-                    "lastName": lastName,
-                    "email": email,
-                    "password": newPassword
+        if (oldPassword != null && oldPassword.trim() != "" && newPassword != null && newPassword.trim() != "" && repeatPassword != null && repeatPassword.trim() != "") {
+            if(newPassword == repeatPassword) {
+                await fetch("http://localhost:8080/api/user/edit-user-account", {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "username": username,
+                        "password": oldPassword
+                    },
+                    body: JSON.stringify({
+                        "username": username,
+                        "firstName": firstName,
+                        "lastName": lastName,
+                        "email": email,
+                        "password": newPassword
+                    })
+                }).then(res => {
+                    if (res.ok) {
+                        return res.json()
+                    } else {
+                        return res.text()
+                    }}).then(data => {
+                    if (typeof data == 'object') {
+                        loadAccountPage(data);
+                        alert("You have successfully updated your details.");
+                    } else {
+                        alert(data);
+                        loadAccountPage(user);
+                        
+                    }
+                    console.log(user);
                 })
-            }).then(res => res.json())
-            .then(user => {
-                console.log(user);
+            } else {
+                alert("Your new passwords didn't match!");
                 loadAccountPage(user);
-            })
+            }
         } else {
-            alert("Your new passwords didn't match!");
-            loadAccountPage(user);
+            alert("You need to fill in the fields or cancel the editing process.");
         }
     }
 
@@ -1591,18 +1705,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         loginButton.style.cursor = "pointer";
         loginButton.addEventListener("click", async () => {
 
-            await fetch("http://localhost:8080/api/user/login", {
-                method: "GET",
-                headers: {
-                    "ContentType": "application/json",
-                    "username": usernameInput.value,
-                    "password": passwordInput.value
-                }
-            }).then(res => res.json())
-            .then(user => {
-                sessionStorage.setItem("userID", user.userId);
-                loadAccountPage(user);
-            })
+            if (passwordInput.value == null || passwordInput.value.trim() == "" || usernameInput.value == null || usernameInput.value.trim() == "") {
+                alert("You need to enter your username and password");
+            } else {
+                await fetch("http://localhost:8080/api/user/login", {
+                    method: "GET",
+                    headers: {
+                        "ContentType": "application/json",
+                        "username": usernameInput.value,
+                        "password": passwordInput.value
+                    }
+                }).then(res => {
+                    if (res.ok) {
+                        return res.json();
+                    } else {
+                        return res.text();
+                    }
+                })
+                .then(data => {
+                    if (typeof data == 'object') {
+                        sessionStorage.setItem("userID", data.userId);
+                        loadAccountPage(data);
+                    } else {
+                        alert(data);
+                    }
+                })
+            }
         })
         loginButton.addEventListener("mouseenter", () => {
             loginButton.style.backgroundColor = "grey";
@@ -1656,7 +1784,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         loginChoice.style.textAlign = "center";
         const loginChoiceHeader = document.createElement("h3");
 
-        loginChoiceHeader.innerText = "You are logged in as " + user.username + "\nEnter your password to continue to purchase.";
+        loginChoiceHeader.innerText = "You are logged in as " + user.username + "\nEnter your password to continue to purchase. 99kr/month.";
         loginChoiceHeader.style.width = "100%";
         const password = document.createElement("input");
         password.type = "password";
@@ -1679,6 +1807,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             paymentWindow.removeAttribute("open");
         })
         paymentWindow.appendChild(cancelButton);
+
         loginBtn.addEventListener("click", () => subscribeEventListener(paymentWindow, loginChoice, password.value, user));
 
         contentDiv.appendChild(paymentWindow);
@@ -1731,9 +1860,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let paymentElement = document.createElement("div");
                 paymentElement.id = "paymentElement";
                 loginChoice.appendChild(paymentElement);
-                
-                console.log(user.username, password, memberFormFirstName.innerText, memberFormLastName.innerText, memberFormEmail.innerText, 
-                    memberFormAddress1.value, memberFormAddress2.value, memberFormPostNumber.value, memberFormCity.value);
 
                 const {clientSecret} = await fetch("http://localhost:8080/api/customer/stripe/activate-subscription", {
                 method: "POST",
