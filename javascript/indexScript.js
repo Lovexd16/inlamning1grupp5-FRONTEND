@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const contactLink = document.getElementById("contactLink");
     const greyBackground = "rgba(211, 211, 211, 0.3)";
     const navList = document.getElementById("navigationList");
+    
+    await loadHomePage();
 
     homeLink.addEventListener("click", () => {
         loadHomePage();
@@ -44,14 +46,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     subscribeDiv.addEventListener("mouseenter", () => {
         createAccountLink.style.textDecoration = "underline";
         memberPage.style.textDecoration = "underline";
+        loginLink.style.textDecoration = "underline";
     })
 
     subscribeDiv.addEventListener("mouseleave", () => {
         createAccountLink.style.textDecoration = "";
         memberPage.style.textDecoration = "";
+        loginLink.style.textDecoration = "";
     })
     
-    await loadHomePage();
     
     async function loadHomePage() {
         contentDiv.innerHTML = "";
@@ -71,10 +74,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (userId && userId.trim().length > 0) {
             console.log("logged in");
             if(navList.querySelector("#loginLink")) {
-                navList.removeChild(navList.querySelector("#loginLink"))
+                navList.removeChild(navList.querySelector("#loginLink"));
+                console.log("here: 1");
             }
             if(navList.querySelector("#createAccountLink")) {
-                navList.removeChild(navList.querySelector("#createAccountLink"))
+                navList.removeChild(navList.querySelector("#createAccountLink"));
+                console.log("here: 2");
             }
             if(!navList.querySelector("#memberPage") && !navList.querySelector("#logOutLink")) {
                 const memberPage = document.createElement("li");
@@ -105,13 +110,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     loadHomePage();
                 })
             }
+            console.log("here: 2.5");
         } else {
             console.log("not logged");
             if(navList.querySelector("#memberPage")) {
-                navList.removeChild(navList.querySelector("#memberPage"))
+                navList.removeChild(navList.querySelector("#memberPage"));
+                console.log("here: 3");
             }
             if(navList.querySelector("#logOutLink")) {
-                navList.removeChild(navList.querySelector("#logOutLink"))
+                navList.removeChild(navList.querySelector("#logOutLink"));
+                console.log("here: 4");
             }
             if(!navList.querySelector("#createAccountLink") && !navList.querySelector("#loginLink")) {
                 const createAccountLink = document.createElement("li");
@@ -129,6 +137,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     loadCreateAccountForm();
                 })
             }
+            console.log("here: 4.5");
         }
     }
 
@@ -395,7 +404,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         newsDivHeader.innerText = "Latest News";
         newsDivHeader.marginTop = "20px";
         newsDivHeader.style.textAlign = "center";
-        const newsDivContent = document.createElement("h2");
+        const newsDivContent = document.createElement("h3");
         newsDivContent.style.margin = "10px";
         newsDivContent.innerText = "Attention festival enthusiasts! Musing Music has secured exclusive behind-the-scenes access to the upcoming Harmony Haven Music Festival. Our team will be on-site, bringing you live interviews, sneak peeks, and all the insider details on the festival's most anticipated performances. Stay tuned for an immersive experience like never before.\n\nOur spotlight this week shines on Luna Serenade, a rising indie star with a genre-bending sound that seamlessly merges folk and electronic elements. Join us for an intimate conversation with Luna as she unveils the inspiration behind her latest album, 'Whispers in the Wind.' \n\nHip-hop meets electronica in the dynamic collaboration between Mic Dropper and Synthwave Wizard. 'Rhythm Revolution' promises to be a genre-defying masterpiece, and we've got the inside scoop on this fusion of rap verses and synth-driven beats that will leave you craving more. \n\nIn vinyl news, the resurgence of classic albums continues to break records. Discover the allure of analog sound as we explore the vinyl revival, speaking with enthusiasts who are spearheading the return of this timeless format. Join us for an in-depth analysis of the ever-evolving landscape of music streaming platforms. \n\nWith new contenders entering the scene, we'll unravel the latest features, exclusive releases, and the ongoing battle for supremacy in the highly competitive streaming wars. Gear up for a musical journey that transcends boundaries and genres. Musing Music is your passport to the freshest updates, groundbreaking developments, and a sneak peek into the future of sound. Stay tuned for upcoming podcasts, interviews, and a symphony of revelations that will keep your ears glued to the beat!\n\nBreaking news on Musing Music: Our upcoming episode will feature an exclusive interview with Melody Maestro, a renowned music producer and visionary in the industry. Tune in as we delve into the secrets behind his latest project, a groundbreaking album that promises to redefine the boundaries of contemporary music. Get ready for behind-the-scenes anecdotes, insights into his creative process, and a sneak peek into the mesmerizing soundscape he has crafted. Melody Maestro's innovative approach to composition is set to inspire aspiring musicians and captivate seasoned music enthusiasts alike."
         newsDiv.append(newsDivHeader, newsDivContent);
@@ -606,7 +615,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         paidContentDiv.style.marginBottom = "10px";
 
         const paidContentDivHeader = document.createElement("h1");
-        paidContentDivHeader.innerText = "Podcasts for Purchase";
+        paidContentDivHeader.innerText = "Podcasts for Purchase\n(If you have a subscription, all podcasts are available from the member page)";
         paidContentDivHeader.style.width = "100%";
         paidContentDivHeader.style.backgroundColor = greyBackground;
         paidContentDivHeader.style.padding = "10px 0 10px 0";
@@ -1124,12 +1133,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                     "username": usernameInput,
                     "password": passwordInput
                 })
-            }).then(res => res.json())
-            .then(user => {
-                console.log(user);
-                createAccountDialog.removeAttribute("open");
-                loadAccountPage(user);
-                sessionStorage.setItem("userID", user.userId);
+            }).then(res => {
+                if(res.ok) {
+                    return res.json()
+                } else {
+                    return res.text()
+                }
+            })
+            .then(data => {
+                if (typeof data == 'object') {
+                    console.log(data);
+                    createAccountDialog.removeAttribute("open");
+                    sessionStorage.setItem("userID", data.userId);
+                    loadHomePage();
+                } else {
+                    alert(data);
+                }
             })
         } else {
             alert("You must fill in all the fields");
@@ -1137,7 +1156,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function loadAccountPage(user) {
-        checkLoggedIn();
+        await checkLoggedIn();
         contentDiv.innerHTML = "";
         contentDiv.style.display = "flex";
         contentDiv.style.flexDirection = "row";
@@ -1266,20 +1285,73 @@ document.addEventListener('DOMContentLoaded', async () => {
         passwordRow.append(passwordRowLeft, passwordRowRight);
         accountDetails.appendChild(passwordRow);
 
-        leftColumn.appendChild(accountDetails);
-
         const editBtnDiv = document.createElement("div");
         editBtnDiv.style.width = "100%";
         editBtnDiv.style.textAlign = "center";
         editBtnDiv.style.padding = "10px 0 10px 0";
         editBtnDiv.style.backgroundColor = greyBackground;
-
+        
         const editBtn = document.createElement("button");
         editBtn.type = "button";
         editBtn.innerText = "Edit Details";
         editBtnDiv.appendChild(editBtn);
+        
+        const purchaseHistory = document.createElement("h2");
+        purchaseHistory.style.width = "100%";
+        purchaseHistory.style.backgroundColor = greyBackground;
+        purchaseHistory.style.textAlign = "center";
+        purchaseHistory.style.padding = "10px 0 10px 0";
+        purchaseHistory.style.margin = "10px 10px 10px 0";
+        purchaseHistory.innerText = "Purchase History";
 
-        leftColumn.appendChild(editBtnDiv);
+        if (user.userPurchaseHistory[0] == null) {
+            const noPurchasesText = document.createElement("h4");
+            noPurchasesText.innerText = "You haven't made any purchases";
+            noPurchasesText.style.width = "100%";
+            noPurchasesText.style.backgroundColor = greyBackground;
+            noPurchasesText.style.textAlign = "center";
+            noPurchasesText.style.padding = "10px 0 10px 0";
+            noPurchasesText.style.margin = "10px 10px 10px 0";
+            purchaseHistory.appendChild(noPurchasesText);
+        } else {
+            user.userPurchaseHistory.forEach(async purchase => {
+                const purchaseDiv = document.createElement("div");
+                purchaseDiv.style.width = "100%";
+                purchaseDiv.style.padding = "10px";
+                purchaseDiv.style.margin = "10px;"
+                purchaseDiv.style.textAlign = "center";
+                const purchaseHeader = document.createElement("h2");
+                const purchaseimg = document.createElement("img");
+                const purchasePrice = document.createElement("h4");
+
+                await fetch("http://localhost:8080/api/customer/stripe/get-single-product", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "productId": purchase
+                    }
+                }).then(res => res.json())
+                .then(async item => {
+                    console.log(item);
+                    purchaseHeader.innerText = item.name;
+                    purchaseimg.src = item.images[0];
+                    await fetch("http://localhost:8080/api/customer/stripe/get-product-price", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "priceId": item.defaultPrice
+                        }
+                    }).then(res => res.json())
+                    .then(price => {
+                        purchasePrice.innerText = (price.unitAmount / 100) + " " + price.currency;
+                    })
+                    
+                })
+                purchaseHistory.append(purchaseHeader, purchaseimg, purchasePrice);
+            });
+        }
+
+        leftColumn.append(accountDetails, editBtnDiv, purchaseHistory);
 
         const rightColumnDiv = document.createElement("div");
         rightColumnDiv.style.width = "45%";
@@ -1340,7 +1412,74 @@ document.addEventListener('DOMContentLoaded', async () => {
                     rightColumnDiv.appendChild(paidEpisodeDivHeader);
                 }
             })
-        })
+
+            const cancelSubscriptionBtnDiv = document.createElement("div");
+            cancelSubscriptionBtnDiv.style.width = "100%";
+            cancelSubscriptionBtnDiv.style.backgroundColor = "100%";
+            cancelSubscriptionBtnDiv.style.padding = "10px";
+            cancelSubscriptionBtnDiv.style.margin = "10px 10px 30px 10px";
+            cancelSubscriptionBtnDiv.style.textAlign = "center";
+            const cancelSubscriptionBtn = document.createElement("button");
+            cancelSubscriptionBtn.type = "button";
+            cancelSubscriptionBtn.innerText = "Cancel Subscription";
+            cancelSubscriptionBtnDiv.appendChild(cancelSubscriptionBtn);
+            rightColumnDiv.appendChild(cancelSubscriptionBtnDiv);
+            const cancelDialog = document.createElement("dialog");
+            cancelDialog.style.top = "10%";
+            rightColumnDiv.appendChild(cancelDialog);
+            cancelSubscriptionBtn.addEventListener("click", () => {
+                
+                cancelDialog.innerHTML = "";
+                console.log("click");
+                window.scrollTo(top);
+                cancelDialog.style.textAlign = "center";
+                const cancelDialogHeader = document.createElement("h2");
+                cancelDialogHeader.innerText = "Are you sure you want to cancel your subscription?\nIf so, enter your password below.";
+                cancelDialog.appendChild(cancelDialogHeader);
+                const password = document.createElement("input");
+                password.type = "password";
+                password.style.display = "block";
+                const confirmBtn = document.createElement("button");
+                confirmBtn.innerText = "Confirm";
+                confirmBtn.style.marginRight = "30px";
+                const cancelButton = document.createElement("button");
+                cancelButton.innerText = "Cancel";
+                cancelButton.style.borderRadius = "15px";
+                cancelButton.style.border = "none";
+                cancelButton.style.marginBottom = "5px";
+                cancelButton.style.fontSize = "Large"; 
+                cancelButton.style.padding = "10px";
+                cancelButton.style.cursor = "pointer";
+    
+                cancelButton.addEventListener("click", () => {
+                    cancelDialog.removeAttribute("open");
+                })
+                
+                cancelDialog.append(cancelDialogHeader, password, confirmBtn, cancelButton);
+                
+                confirmBtn.addEventListener("click", () => confirmBtnEventListener(password.value, user));
+                cancelDialog.setAttribute("open", true);
+            })
+            
+            async function confirmBtnEventListener(password, username) {
+                console.log(username, password)
+                await fetch("http://localhost:8080/api/customer/stripe/cancel-subscription", {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "username": user.username,
+                        "password": password
+                    }
+                }).then(res => res.text())
+                .then(subscription => {
+                    console.log(subscription);
+                    alert(subscription);
+                    cancelDialog.removeAttribute("open");
+                    loadHomePage();
+                })
+            }
+        }) 
+
         } else {
             const subscribedPodcastsDivHeader = document.createElement("h2");
             subscribedPodcastsDivHeader.innerText = "You are not subscribed";
@@ -1382,7 +1521,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             const confirmEditBtn = document.createElement("button");
             confirmEditBtn.type = "button";
             confirmEditBtn.innerText = "Confirm Changes";
-            editBtnDiv.appendChild(confirmEditBtn);
+            const cancelButton = document.createElement("button");
+            cancelButton.innerText = "Cancel";
+            cancelButton.style.borderRadius = "15px";
+            cancelButton.style.border = "none";
+            cancelButton.style.margin = "0 0 5px 10px";
+            cancelButton.style.fontSize = "Large"; 
+            cancelButton.style.padding = "10px";
+            cancelButton.style.cursor = "pointer";
+            cancelButton.addEventListener("click", () => {
+                loadAccountPage(user);
+            })
+            editBtnDiv.append(confirmEditBtn, cancelButton);
             confirmEditBtn.addEventListener("click", () => confirmEditBtnEventListener(user, user.firstName, user.lastName, user.username, email.value, oldPassword.value, newPassword.value, repeatPassword.value));
         })
 
@@ -1425,11 +1575,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                             "username": user.username,
                             "password": confirmationDialogInput.value
                         }
-                    }).then(res => res.text())
+                    }).then(res => {
+                        if(!res.ok) {
+                            throw new Error("Incorrect Password");
+                        }
+                        return res.text();
+                    })
                     .then(data => {
                         console.log(data);
+                        sessionStorage.removeItem("userID");
                         confirmationDialog.removeAttribute("open");
+                        alert(data);
                         loadHomePage();
+                    })
+                    .catch(error => {
+                        alert(error);
+                        loadAccountPage(user);
                     })
                 } 
                 
@@ -1471,29 +1632,44 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function confirmEditBtnEventListener(user, firstName, lastName, username, email, oldPassword, newPassword, repeatPassword) {
 
-        if(newPassword == repeatPassword) {
-            await fetch("http://localhost:8080/api/user/edit-user-account", {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    "username": username,
-                    "password": oldPassword
-                },
-                body: JSON.stringify({
-                    "username": username,
-                    "firstName": firstName,
-                    "lastName": lastName,
-                    "email": email,
-                    "password": newPassword
+        if (oldPassword != null && oldPassword.trim() != "" && newPassword != null && newPassword.trim() != "" && repeatPassword != null && repeatPassword.trim() != "") {
+            if(newPassword == repeatPassword) {
+                await fetch("http://localhost:8080/api/user/edit-user-account", {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "username": username,
+                        "password": oldPassword
+                    },
+                    body: JSON.stringify({
+                        "username": username,
+                        "firstName": firstName,
+                        "lastName": lastName,
+                        "email": email,
+                        "password": newPassword
+                    })
+                }).then(res => {
+                    if (res.ok) {
+                        return res.json()
+                    } else {
+                        return res.text()
+                    }}).then(data => {
+                    if (typeof data == 'object') {
+                        loadAccountPage(data);
+                        alert("You have successfully updated your details.");
+                    } else {
+                        alert(data);
+                        loadAccountPage(user);
+                        
+                    }
+                    console.log(user);
                 })
-            }).then(res => res.json())
-            .then(user => {
-                console.log(user);
+            } else {
+                alert("Your new passwords didn't match!");
                 loadAccountPage(user);
-            })
+            }
         } else {
-            alert("Your new passwords didn't match!");
-            loadAccountPage(user);
+            alert("You need to fill in the fields or cancel the editing process.");
         }
     }
 
@@ -1529,18 +1705,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         loginButton.style.cursor = "pointer";
         loginButton.addEventListener("click", async () => {
 
-            await fetch("http://localhost:8080/api/user/login", {
-                method: "GET",
-                headers: {
-                    "ContentType": "application/json",
-                    "username": usernameInput.value,
-                    "password": passwordInput.value
-                }
-            }).then(res => res.json())
-            .then(user => {
-                sessionStorage.setItem("userID", user.userId);
-                loadAccountPage(user);
-            })
+            if (passwordInput.value == null || passwordInput.value.trim() == "" || usernameInput.value == null || usernameInput.value.trim() == "") {
+                alert("You need to enter your username and password");
+            } else {
+                await fetch("http://localhost:8080/api/user/login", {
+                    method: "GET",
+                    headers: {
+                        "ContentType": "application/json",
+                        "username": usernameInput.value,
+                        "password": passwordInput.value
+                    }
+                }).then(res => {
+                    if (res.ok) {
+                        return res.json();
+                    } else {
+                        return res.text();
+                    }
+                })
+                .then(data => {
+                    if (typeof data == 'object') {
+                        sessionStorage.setItem("userID", data.userId);
+                        loadAccountPage(data);
+                    } else {
+                        alert(data);
+                    }
+                })
+            }
         })
         loginButton.addEventListener("mouseenter", () => {
             loginButton.style.backgroundColor = "grey";
@@ -1594,7 +1784,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         loginChoice.style.textAlign = "center";
         const loginChoiceHeader = document.createElement("h3");
 
-        loginChoiceHeader.innerText = "You are logged in as " + user.username + "\nEnter your password to continue to purchase.";
+        loginChoiceHeader.innerText = "You are logged in as " + user.username + "\nEnter your password to continue to purchase. 99kr/month.";
         loginChoiceHeader.style.width = "100%";
         const password = document.createElement("input");
         password.type = "password";
@@ -1617,6 +1807,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             paymentWindow.removeAttribute("open");
         })
         paymentWindow.appendChild(cancelButton);
+
         loginBtn.addEventListener("click", () => subscribeEventListener(paymentWindow, loginChoice, password.value, user));
 
         contentDiv.appendChild(paymentWindow);
@@ -1669,9 +1860,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let paymentElement = document.createElement("div");
                 paymentElement.id = "paymentElement";
                 loginChoice.appendChild(paymentElement);
-                
-                console.log(user.username, password, memberFormFirstName.innerText, memberFormLastName.innerText, memberFormEmail.innerText, 
-                    memberFormAddress1.value, memberFormAddress2.value, memberFormPostNumber.value, memberFormCity.value);
 
                 const {clientSecret} = await fetch("http://localhost:8080/api/customer/stripe/activate-subscription", {
                 method: "POST",
@@ -1745,5 +1933,60 @@ document.addEventListener('DOMContentLoaded', async () => {
                 loginChoice.appendChild(errorMessage);
             }
         })
+    }
+
+    async function loadContactPage() {
+        contentDiv.innerHTML = "";
+        contentDiv.style.display = "flex";
+        contentDiv.style.flexDirection = "row";
+        contentDiv.style.flexWrap = "wrap";
+
+        const contactPageHeader = document.createElement("h2");
+        contactPageHeader.innerText = "Get In Touch";
+        contactPageHeader.style.backgroundColor = greyBackground;
+        contactPageHeader.style.padding = "10px 0 10px 0";
+        contactPageHeader.style.textAlign = "center";
+        contactPageHeader.style.width = "100%";
+        contentDiv.appendChild(contactPageHeader);
+
+        const emailsDiv = document.createElement("div");
+        emailsDiv.style.width = "100%";
+        emailsDiv.style.display = "flex";
+        emailsDiv.style.flexDirection = "row";
+        emailsDiv.style.flexWrap = "wrap";
+
+        const emailLeft = document.createElement("div");
+        emailLeft.style.width = "48%";
+        emailLeft.style.margin = "10px 20px 10px 20px";
+        emailLeft.style.textAlign = "center";
+        emailLeft.style.backgroundColor = greyBackground;
+        const emailLeftText = document.createElement("h2");
+        emailLeftText.innerText = "Contact the Podcast: musingmusic@podcast.com";
+        emailLeft.appendChild(emailLeftText);
+
+        const emailRight = document.createElement("div");
+        emailRight.style.width = "48%";
+        emailRight.style.margin = "10px";
+        emailRight.style.textAlign = "center";
+        emailRight.style.backgroundColor = greyBackground;
+        const emailRightText = document.createElement("h2");
+        emailRightText.innerText = "Contact tech support: devteam@techsupport.com";
+        emailRight.appendChild(emailRightText);
+
+        emailsDiv.append(emailLeft, emailRight);
+        contentDiv.appendChild(emailsDiv);
+
+        const imgDiv = document.createElement("div");
+        imgDiv.style.width = "100%";
+        imgDiv.style.textAlign = "center";
+        imgDiv.style.backgroundColor = greyBackground;
+        imgDiv.style.padding = "20px";
+        imgDiv.style.margin = "20px";
+        const img = document.createElement("img");
+        img.style.height = "400px";
+        img.src = "resources/images/podcastLogo.png";
+        imgDiv.appendChild(img);
+        contentDiv.appendChild(imgDiv)
+
     }
 })
