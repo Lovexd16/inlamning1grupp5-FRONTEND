@@ -74,10 +74,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (userId && userId.trim().length > 0) {
             console.log("logged in");
             if(navList.querySelector("#loginLink")) {
-                navList.removeChild(navList.querySelector("#loginLink"))
+                navList.removeChild(navList.querySelector("#loginLink"));
+                console.log("here: 1");
             }
             if(navList.querySelector("#createAccountLink")) {
-                navList.removeChild(navList.querySelector("#createAccountLink"))
+                navList.removeChild(navList.querySelector("#createAccountLink"));
+                console.log("here: 2");
             }
             if(!navList.querySelector("#memberPage") && !navList.querySelector("#logOutLink")) {
                 const memberPage = document.createElement("li");
@@ -108,13 +110,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     loadHomePage();
                 })
             }
+            console.log("here: 2.5");
         } else {
             console.log("not logged");
             if(navList.querySelector("#memberPage")) {
-                navList.removeChild(navList.querySelector("#memberPage"))
+                navList.removeChild(navList.querySelector("#memberPage"));
+                console.log("here: 3");
             }
             if(navList.querySelector("#logOutLink")) {
-                navList.removeChild(navList.querySelector("#logOutLink"))
+                navList.removeChild(navList.querySelector("#logOutLink"));
+                console.log("here: 4");
             }
             if(!navList.querySelector("#createAccountLink") && !navList.querySelector("#loginLink")) {
                 const createAccountLink = document.createElement("li");
@@ -132,6 +137,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     loadCreateAccountForm();
                 })
             }
+            console.log("here: 4.5");
         }
     }
 
@@ -609,7 +615,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         paidContentDiv.style.marginBottom = "10px";
 
         const paidContentDivHeader = document.createElement("h1");
-        paidContentDivHeader.innerText = "Podcasts for Purchase";
+        paidContentDivHeader.innerText = "Podcasts for Purchase\n(If you have a subscription, all podcasts are available from the member page)";
         paidContentDivHeader.style.width = "100%";
         paidContentDivHeader.style.backgroundColor = greyBackground;
         paidContentDivHeader.style.padding = "10px 0 10px 0";
@@ -1131,8 +1137,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             .then(user => {
                 console.log(user);
                 createAccountDialog.removeAttribute("open");
-                loadAccountPage(user);
                 sessionStorage.setItem("userID", user.userId);
+                loadHomePage();
             })
         } else {
             alert("You must fill in all the fields");
@@ -1140,7 +1146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function loadAccountPage(user) {
-        checkLoggedIn();
+        await checkLoggedIn();
         contentDiv.innerHTML = "";
         contentDiv.style.display = "flex";
         contentDiv.style.flexDirection = "row";
@@ -1269,20 +1275,73 @@ document.addEventListener('DOMContentLoaded', async () => {
         passwordRow.append(passwordRowLeft, passwordRowRight);
         accountDetails.appendChild(passwordRow);
 
-        leftColumn.appendChild(accountDetails);
-
         const editBtnDiv = document.createElement("div");
         editBtnDiv.style.width = "100%";
         editBtnDiv.style.textAlign = "center";
         editBtnDiv.style.padding = "10px 0 10px 0";
         editBtnDiv.style.backgroundColor = greyBackground;
-
+        
         const editBtn = document.createElement("button");
         editBtn.type = "button";
         editBtn.innerText = "Edit Details";
         editBtnDiv.appendChild(editBtn);
+        
+        const purchaseHistory = document.createElement("h2");
+        purchaseHistory.style.width = "100%";
+        purchaseHistory.style.backgroundColor = greyBackground;
+        purchaseHistory.style.textAlign = "center";
+        purchaseHistory.style.padding = "10px 0 10px 0";
+        purchaseHistory.style.margin = "10px 10px 10px 0";
+        purchaseHistory.innerText = "Purchase History";
 
-        leftColumn.appendChild(editBtnDiv);
+        if (user.userPurchaseHistory[0] == null) {
+            const noPurchasesText = document.createElement("h4");
+            noPurchasesText.innerText = "You haven't made any purchases";
+            noPurchasesText.style.width = "100%";
+            noPurchasesText.style.backgroundColor = greyBackground;
+            noPurchasesText.style.textAlign = "center";
+            noPurchasesText.style.padding = "10px 0 10px 0";
+            noPurchasesText.style.margin = "10px 10px 10px 0";
+            purchaseHistory.appendChild(noPurchasesText);
+        } else {
+            user.userPurchaseHistory.forEach(async purchase => {
+                const purchaseDiv = document.createElement("div");
+                purchaseDiv.style.width = "100%";
+                purchaseDiv.style.padding = "10px";
+                purchaseDiv.style.margin = "10px;"
+                purchaseDiv.style.textAlign = "center";
+                const purchaseHeader = document.createElement("h2");
+                const purchaseimg = document.createElement("img");
+                const purchasePrice = document.createElement("h4");
+
+                await fetch("http://localhost:8080/api/customer/stripe/get-single-product", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "productId": purchase
+                    }
+                }).then(res => res.json())
+                .then(async item => {
+                    console.log(item);
+                    purchaseHeader.innerText = item.name;
+                    purchaseimg.src = item.images[0];
+                    await fetch("http://localhost:8080/api/customer/stripe/get-product-price", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "priceId": item.defaultPrice
+                        }
+                    }).then(res => res.json())
+                    .then(price => {
+                        purchasePrice.innerText = (price.unitAmount / 100) + " " + price.currency;
+                    })
+                    
+                })
+                purchaseHistory.append(purchaseHeader, purchaseimg, purchasePrice);
+            });
+        }
+
+        leftColumn.append(accountDetails, editBtnDiv, purchaseHistory);
 
         const rightColumnDiv = document.createElement("div");
         rightColumnDiv.style.width = "45%";
