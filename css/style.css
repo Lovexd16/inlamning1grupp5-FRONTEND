@@ -54,7 +54,7 @@ body::-webkit-scrollbar:hover {
     width: 100vw;
 }
 
-#homeLink:hover, #merchandiseLink:hover, #podcastsLink:hover, #contactLink:hover, #createAccountLink:hover, #loginLink:hover {
+#homeLink:hover, #merchandiseLink:hover, #podcastsLink:hover, #contactLink:hover, #createAccountLink:hover, #loginLink:hover, #memberPage:hover, #logOutLink:hover {
     text-decoration: underline;
     cursor: pointer;
 }
