@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const contactLink = document.getElementById("contactLink");
     const greyBackground = "rgba(211, 211, 211, 0.3)";
     const navList = document.getElementById("navigationList");
+    
+    await loadHomePage();
 
     homeLink.addEventListener("click", () => {
         loadHomePage();
@@ -44,14 +46,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     subscribeDiv.addEventListener("mouseenter", () => {
         createAccountLink.style.textDecoration = "underline";
         memberPage.style.textDecoration = "underline";
+        loginLink.style.textDecoration = "underline";
     })
 
     subscribeDiv.addEventListener("mouseleave", () => {
         createAccountLink.style.textDecoration = "";
         memberPage.style.textDecoration = "";
+        loginLink.style.textDecoration = "";
     })
     
-    await loadHomePage();
     
     async function loadHomePage() {
         contentDiv.innerHTML = "";
@@ -395,7 +398,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         newsDivHeader.innerText = "Latest News";
         newsDivHeader.marginTop = "20px";
         newsDivHeader.style.textAlign = "center";
-        const newsDivContent = document.createElement("h2");
+        const newsDivContent = document.createElement("h3");
         newsDivContent.style.margin = "10px";
         newsDivContent.innerText = "Attention festival enthusiasts! Musing Music has secured exclusive behind-the-scenes access to the upcoming Harmony Haven Music Festival. Our team will be on-site, bringing you live interviews, sneak peeks, and all the insider details on the festival's most anticipated performances. Stay tuned for an immersive experience like never before.\n\nOur spotlight this week shines on Luna Serenade, a rising indie star with a genre-bending sound that seamlessly merges folk and electronic elements. Join us for an intimate conversation with Luna as she unveils the inspiration behind her latest album, 'Whispers in the Wind.' \n\nHip-hop meets electronica in the dynamic collaboration between Mic Dropper and Synthwave Wizard. 'Rhythm Revolution' promises to be a genre-defying masterpiece, and we've got the inside scoop on this fusion of rap verses and synth-driven beats that will leave you craving more. \n\nIn vinyl news, the resurgence of classic albums continues to break records. Discover the allure of analog sound as we explore the vinyl revival, speaking with enthusiasts who are spearheading the return of this timeless format. Join us for an in-depth analysis of the ever-evolving landscape of music streaming platforms. \n\nWith new contenders entering the scene, we'll unravel the latest features, exclusive releases, and the ongoing battle for supremacy in the highly competitive streaming wars. Gear up for a musical journey that transcends boundaries and genres. Musing Music is your passport to the freshest updates, groundbreaking developments, and a sneak peek into the future of sound. Stay tuned for upcoming podcasts, interviews, and a symphony of revelations that will keep your ears glued to the beat!\n\nBreaking news on Musing Music: Our upcoming episode will feature an exclusive interview with Melody Maestro, a renowned music producer and visionary in the industry. Tune in as we delve into the secrets behind his latest project, a groundbreaking album that promises to redefine the boundaries of contemporary music. Get ready for behind-the-scenes anecdotes, insights into his creative process, and a sneak peek into the mesmerizing soundscape he has crafted. Melody Maestro's innovative approach to composition is set to inspire aspiring musicians and captivate seasoned music enthusiasts alike."
         newsDiv.append(newsDivHeader, newsDivContent);
@@ -1745,5 +1748,60 @@ document.addEventListener('DOMContentLoaded', async () => {
                 loginChoice.appendChild(errorMessage);
             }
         })
+    }
+
+    async function loadContactPage() {
+        contentDiv.innerHTML = "";
+        contentDiv.style.display = "flex";
+        contentDiv.style.flexDirection = "row";
+        contentDiv.style.flexWrap = "wrap";
+
+        const contactPageHeader = document.createElement("h2");
+        contactPageHeader.innerText = "Get In Touch";
+        contactPageHeader.style.backgroundColor = greyBackground;
+        contactPageHeader.style.padding = "10px 0 10px 0";
+        contactPageHeader.style.textAlign = "center";
+        contactPageHeader.style.width = "100%";
+        contentDiv.appendChild(contactPageHeader);
+
+        const emailsDiv = document.createElement("div");
+        emailsDiv.style.width = "100%";
+        emailsDiv.style.display = "flex";
+        emailsDiv.style.flexDirection = "row";
+        emailsDiv.style.flexWrap = "wrap";
+
+        const emailLeft = document.createElement("div");
+        emailLeft.style.width = "48%";
+        emailLeft.style.margin = "10px 20px 10px 20px";
+        emailLeft.style.textAlign = "center";
+        emailLeft.style.backgroundColor = greyBackground;
+        const emailLeftText = document.createElement("h2");
+        emailLeftText.innerText = "Contact the Podcast: musingmusic@podcast.com";
+        emailLeft.appendChild(emailLeftText);
+
+        const emailRight = document.createElement("div");
+        emailRight.style.width = "48%";
+        emailRight.style.margin = "10px";
+        emailRight.style.textAlign = "center";
+        emailRight.style.backgroundColor = greyBackground;
+        const emailRightText = document.createElement("h2");
+        emailRightText.innerText = "Contact tech support: devteam@techsupport.com";
+        emailRight.appendChild(emailRightText);
+
+        emailsDiv.append(emailLeft, emailRight);
+        contentDiv.appendChild(emailsDiv);
+
+        const imgDiv = document.createElement("div");
+        imgDiv.style.width = "100%";
+        imgDiv.style.textAlign = "center";
+        imgDiv.style.backgroundColor = greyBackground;
+        imgDiv.style.padding = "20px";
+        imgDiv.style.margin = "20px";
+        const img = document.createElement("img");
+        img.style.height = "400px";
+        img.src = "resources/images/podcastLogo.png";
+        imgDiv.appendChild(img);
+        contentDiv.appendChild(imgDiv)
+
     }
 })
