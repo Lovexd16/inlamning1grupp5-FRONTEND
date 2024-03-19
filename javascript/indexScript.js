@@ -1,5 +1,8 @@
+
 document.addEventListener('DOMContentLoaded', async () => {
     
+    const body = document.getElementById("body");
+    const loadingIcon = document.getElementById("loadingIcon");
     const subscribeDiv = document.getElementById("subscribeDiv");
     const contentDiv = document.getElementById("contentDiv");
     const homeLink = document.getElementById("homeLink");
@@ -8,7 +11,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const contactLink = document.getElementById("contactLink");
     const greyBackground = "rgba(211, 211, 211, 0.3)";
     const navList = document.getElementById("navigationList");
-    
+
+    loadingIcon.style.display = "block";
+
     await loadHomePage();
 
     homeLink.addEventListener("click", () => {
@@ -57,6 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     
     async function loadHomePage() {
+        loadingIcon.style.display = "block";
         contentDiv.innerHTML = "";
         contentDiv.style.display = "flex";
         contentDiv.style.flexDirection = "row";
@@ -540,11 +546,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 merchImage.style.cursor = "pointer";
             }
             merchcolumnDiv.append(merchImageDiv);
+            loadingIcon.style.display = "none";
+            body.style.backgroundColor = "";
 
         })
     }
 
     async function loadPodcastsPage() {
+        loadingIcon.style.display = "block";
         contentDiv.innerHTML = "";
         contentDiv.style.display = "flex";
         contentDiv.style.flexDirection = "column";
@@ -695,6 +704,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             paidContentDiv.appendChild(paidContentDivPodcasts);
             contentDiv.appendChild(paidContentDiv);
         })
+        loadingIcon.style.display = "none";
     }
 
     async function loginBtnEventListener(product, paymentWindow, loginChoice, password, user) {
@@ -947,7 +957,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function loadMerchandisePage() {
-
+        loadingIcon.style.display = "block";
         contentDiv.innerHTML = "";
         contentDiv.style.display = "flex";
         contentDiv.style.flexDirection = "column";
@@ -1038,6 +1048,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             paidContentDiv.appendChild(paidContentDivPodcasts);
             contentDiv.appendChild(paidContentDiv);
         })
+        loadingIcon.style.display = "none";
     }
 
     async function loadCreateAccountForm() {
@@ -1156,6 +1167,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function loadAccountPage(user) {
+        loadingIcon.style.display = "block";
         await checkLoggedIn();
         contentDiv.innerHTML = "";
         contentDiv.style.display = "flex";
@@ -1413,17 +1425,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             })
 
-            const cancelSubscriptionBtnDiv = document.createElement("div");
-            cancelSubscriptionBtnDiv.style.width = "100%";
-            cancelSubscriptionBtnDiv.style.backgroundColor = "100%";
-            cancelSubscriptionBtnDiv.style.padding = "10px";
-            cancelSubscriptionBtnDiv.style.margin = "10px 10px 30px 10px";
-            cancelSubscriptionBtnDiv.style.textAlign = "center";
             const cancelSubscriptionBtn = document.createElement("button");
             cancelSubscriptionBtn.type = "button";
             cancelSubscriptionBtn.innerText = "Cancel Subscription";
-            cancelSubscriptionBtnDiv.appendChild(cancelSubscriptionBtn);
-            rightColumnDiv.appendChild(cancelSubscriptionBtnDiv);
+            cancelSubscriptionBtn.style.marginLeft = "20px"
+            editBtnDiv.appendChild(cancelSubscriptionBtn);
             const cancelDialog = document.createElement("dialog");
             cancelDialog.style.top = "10%";
             rightColumnDiv.appendChild(cancelDialog);
@@ -1628,6 +1634,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             contentDiv.appendChild(confirmationDialog);
 
         })
+        loadingIcon.style.display = "none";
     }
 
     async function confirmEditBtnEventListener(user, firstName, lastName, username, email, oldPassword, newPassword, repeatPassword) {
@@ -1936,6 +1943,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function loadContactPage() {
+        loadingIcon.style.display = "block";
         contentDiv.innerHTML = "";
         contentDiv.style.display = "flex";
         contentDiv.style.flexDirection = "row";
@@ -1987,6 +1995,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         img.src = "resources/images/podcastLogo.png";
         imgDiv.appendChild(img);
         contentDiv.appendChild(imgDiv)
-
+        loadingIcon.style.display = "none";
     }
 })

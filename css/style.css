@@ -127,3 +127,17 @@ input {
     margin: auto auto 10px auto;
     padding: 5px;
 }
+
+#loadingIcon {
+    width: 100vw;
+    height: 100vh;
+    text-align: center;
+    background-color: rgba(211, 211, 211, 0.5);
+    position: absolute;
+}
+
+#loadingImg {
+    margin-top: 45vh;
+    width: 100px;
+    height: 100px;
+}
