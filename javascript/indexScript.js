@@ -1359,7 +1359,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                     })
                     
                 })
-                purchaseHistory.append(purchaseHeader, purchaseimg, purchasePrice);
+
+                const audio = new Audio();
+                await fetch("http://localhost:8080/api/podcasts/get-podcast", {
+
+                        method: "GET",
+                        headers: {
+                            "productId": purchase                  
+                        }
+                    }) 
+                    .then(res => res.blob())
+                    .then(podcasts => {
+                        console.log(podcasts);
+                        audio.src = URL.createObjectURL(podcasts);
+                        audio.style.maxWidth = "100%";
+                        audio.controls = true;
+                        audio.style.width = "98%";
+                    })
+                purchaseHistory.append(purchaseHeader, purchaseimg, audio, purchasePrice);
             });
         }
 
