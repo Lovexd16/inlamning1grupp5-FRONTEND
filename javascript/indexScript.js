@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await fetch ("http://localhost:8080/api/customer/stripe/get-single-product", {
             method: "GET",
             headers: {
-                productId: "prod_PgRBbMLHkVFAbt"
+                productId: "prod_PlYoFDnmLgGRnc"
             }
         }).then(res => res.json())
         .then(product => {
@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await fetch ("http://localhost:8080/api/customer/stripe/get-single-product", {
             method: "GET",
             headers: {
-                productId: "prod_PgQg334IZiZpxh"
+                productId: "prod_PlYyPXjHYm9Xxi"
             }
         }).then(res => res.json())
         .then(product => {
@@ -385,7 +385,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await fetch ("http://localhost:8080/api/customer/stripe/get-single-product", {
             method: "GET",
             headers: {
-                productId: "prod_PgQjUTmE0vehg2"
+                productId: "prod_PlYqih0DqvGunZ"
             }
         }).then(res => res.json())
         .then(product => {
@@ -1018,7 +1018,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const paidEpisodeImage = document.createElement("img");
                     paidEpisodeImage.src = element.images[0];
                     paidEpisodeImage.style.width = "95%";
-                    paidEpisodeImage.style.height = "400px";
+                    paidEpisodeImage.style.height = "350px";
                     paidEpisodeDiv.appendChild(paidEpisodeImage);
         
                     const buyButton = document.createElement("button");
@@ -1889,7 +1889,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 method: "POST",
                 headers:{
                     "Content-Type": "application/json",
-                    "productId": "prod_PgRCdpWdFlXZyw",
+                    "productId": "prod_PlYMQJcnsO59yP",
                     "username": user.username,
                     "password": password
                 },

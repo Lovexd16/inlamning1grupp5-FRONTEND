@@ -130,7 +130,7 @@ input {
 
 #loadingIcon {
     width: 100vw;
-    height: 100vh;
+    height: 100%;
     text-align: center;
     background-color: rgba(211, 211, 211, 0.5);
     position: absolute;
