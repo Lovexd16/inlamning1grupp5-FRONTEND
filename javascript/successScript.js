@@ -13,7 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const productId = url.get('productId');
     
     if (success == 'true') {
-        console.log('Product ID:', productId);
         
         fetch("http://localhost:8080/api/podcasts/get-podcast", {
             method: "GET",
@@ -29,7 +28,6 @@ document.addEventListener("DOMContentLoaded", () => {
             congratsHeader.style.textAlign = "center";
             congratsHeader.style.padding = "10px 0 10px 0";
             contentDiv.appendChild(congratsHeader);
-            console.log(blob);
             const audio = new Audio();
             audio.src = URL.createObjectURL(blob);
             audio.style.maxWidth = "100%";
@@ -43,7 +41,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }).then(res => res.json())
             .then(product => {
-                console.log(product);
 
                 let productName = product.name.substring(0, 9);
                 
@@ -93,15 +90,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     downloadWarningDiv.appendChild(returnHome);
                     contentDiv.appendChild(boughtPodcastDiv);
                 } else {
-                    const boughtPodcastDiv = document.createElement("div");
-                    boughtPodcastDiv.width = "100%";
+                    const boughtMerchDiv = document.createElement("div");
+                    boughtMerchDiv.width = "100%";
                     const boughtPodcastDivHeader = document.createElement("h2");
                     boughtPodcastDivHeader.innerText = "You now have purchased  " + product.name;
                     boughtPodcastDivHeader.style.width = "100%";
                     boughtPodcastDivHeader.style.textAlign = "center";
                     boughtPodcastDivHeader.style.backgroundColor = greyBackground;
                     boughtPodcastDivHeader.style.padding = "10px";
-                    boughtPodcastDiv.appendChild(boughtPodcastDivHeader);
+                    boughtMerchDiv.appendChild(boughtPodcastDivHeader);
     
                     const boughtPodcastImageDiv = document.createElement("div");
                     boughtPodcastImageDiv.style.width = "100%";
@@ -111,7 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const boughtPodcastImage = document.createElement("img");
                     boughtPodcastImage.src = product.images[0];
                     boughtPodcastImageDiv.append(boughtPodcastImage);
-                    boughtPodcastDiv.appendChild(boughtPodcastImageDiv);
+                    boughtMerchDiv.appendChild(boughtPodcastImageDiv);
     
                     const downloadWarningDiv = document.createElement("h3");
                     downloadWarningDiv.style.width = "100%";
@@ -119,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     downloadWarningDiv.style.textAlign = "center";
                     downloadWarningDiv.style.backgroundColor = greyBackground;
                     downloadWarningDiv.innerText = "Check your email for purchase confirmation and we will let you know as soon as your merch is on its way to you!";
-                    boughtPodcastDiv.appendChild(downloadWarningDiv);
+                    boughtMerchDiv.appendChild(downloadWarningDiv);
     
                     const returnHome = document.createElement("button");
                     returnHome.innerText = "Return Home";
@@ -129,13 +126,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     })
     
                     downloadWarningDiv.appendChild(returnHome);
-                    contentDiv.appendChild(boughtPodcastDiv);
+                    contentDiv.appendChild(boughtMerchDiv);
                 }
             }) 
         })
-    } else {
-        console.log("Something went wrong");
-    }
-    
-
+    } 
 })
