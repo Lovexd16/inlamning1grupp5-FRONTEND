@@ -32,14 +32,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadContactPage();
     })
 
-    
-    if (localStorage.getItem("purchase") == "") {
-        console.log("here: " + purchaseSuccessful);
-    } else {
-        console.log("start");
-    }
-
-
     const publicKey = await fetch("http://localhost:8080/api/customer/stripe/get-public-key")
     .then(res => res.text());
     if (!publicKey) {
@@ -75,17 +67,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     async function checkLoggedIn() {
         let userId = sessionStorage.getItem("userID");
-        console.log(userId);
                 
         if (userId && userId.trim().length > 0) {
-            console.log("logged in");
             if(navList.querySelector("#loginLink")) {
                 navList.removeChild(navList.querySelector("#loginLink"));
-                console.log("here: 1");
             }
             if(navList.querySelector("#createAccountLink")) {
                 navList.removeChild(navList.querySelector("#createAccountLink"));
-                console.log("here: 2");
             }
             if(!navList.querySelector("#memberPage") && !navList.querySelector("#logOutLink")) {
                 const memberPage = document.createElement("li");
@@ -111,21 +99,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     })
                 })
                 logOutLink.addEventListener("click", () => {
-                    console.log("clickL");
                     sessionStorage.removeItem("userID");
                     loadHomePage();
                 })
             }
-            console.log("here: 2.5");
         } else {
-            console.log("not logged");
             if(navList.querySelector("#memberPage")) {
                 navList.removeChild(navList.querySelector("#memberPage"));
-                console.log("here: 3");
             }
             if(navList.querySelector("#logOutLink")) {
                 navList.removeChild(navList.querySelector("#logOutLink"));
-                console.log("here: 4");
             }
             if(!navList.querySelector("#createAccountLink") && !navList.querySelector("#loginLink")) {
                 const createAccountLink = document.createElement("li");
@@ -143,7 +126,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     loadCreateAccountForm();
                 })
             }
-            console.log("here: 4.5");
         }
     }
 
@@ -401,7 +383,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         middleColumnDiv.appendChild(reviewsDiv);
 
         const newsDiv = document.createElement("div");
-        newsDiv.style.marginTop = "30px";
+        newsDiv.style.marginTop = "130px";
         newsDiv.style.bottom = "0%";
         newsDiv.style.paddingBottom = "30px";
         newsDiv.style.display = "block";
@@ -426,7 +408,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         paymentWindow.style.backgroundSize = "cover";
         paymentWindow.style.backgroundRepeat = "no-repeat";
         paymentWindow.style.backgroundPosition = "center";
-        console.log(product);
         paymentWindow.style.color = "white";
         const paymentWindowHeader = document.createElement("h2");
         paymentWindowHeader.innerText = "You are about to purchase " + product.name + "!";
@@ -661,7 +642,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     }).then(res => res.json())
                     .then(price => {
-                        console.log(price);
                         paidEpisodeDivHeaderPrice.innerText = (price.unitAmount / 100) + " " + price.currency;
                     })
 
@@ -756,7 +736,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 paymentElement.id = "paymentElement";
                 loginChoice.appendChild(paymentElement);
     
-                console.log(product.id);
                 const {clientSecret} = await fetch("http://localhost:8080/api/customer/stripe/one-time-purchase", {
                 method: "POST",
                 headers:{
@@ -785,8 +764,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 errorMessage.innerText = "All fields except 'Address 2' are required, including a valid email address.";
                 loginChoice.appendChild(errorMessage);
             });
-            
-            console.log({clientSecret});
         
             const elements = stripe.elements({clientSecret});
             paymentElement = elements.create('payment');
@@ -801,7 +778,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     }).then(res => res.json())
                     .then(price => {
-                        console.log(price);
                         paidEpisodeDivHeaderPrice.innerText = (price.unitAmount / 100) + " " + price.currency;
                     })
             const payBtn = document.createElement("button");
@@ -810,11 +786,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     
             payBtn.addEventListener("click", async () => {
                 
-                console.log("click");
                 const {error} = await stripe.confirmPayment({
                     elements,
                     confirmParams: {
-                        return_url: `${window.location.origin}/successfulPurchase.html?success=true&productId=${product.id}`
+                        return_url: `${window.location.origin}/successfulPurchase.html?success=true&productId=${product.id}&userId=${sessionStorage.getItem("userID")}`
                     }
                 })
                 if (error) {
@@ -883,7 +858,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 paymentElement.id = "paymentElement";
                 loginChoice.appendChild(paymentElement);
     
-                console.log(product.id);
                 const {clientSecret} = await fetch("http://localhost:8080/api/customer/stripe/one-time-purchase", {
                 method: "POST",
                 headers:{
@@ -910,9 +884,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 errorMessage.innerText = "All fields except 'Address 2' are required, including a valid email address.";
                 loginChoice.appendChild(errorMessage);
             });
-            
-            console.log({clientSecret});
-        
+                
             const elements = stripe.elements({clientSecret});
             paymentElement = elements.create('payment');
             paymentElement.mount('#paymentElement');
@@ -926,7 +898,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     }).then(res => res.json())
                     .then(price => {
-                        console.log(price);
                         paidEpisodeDivHeaderPrice.innerText = (price.unitAmount / 100) + " " + price.currency;
                     })
             const payBtn = document.createElement("button");
@@ -935,7 +906,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     
             payBtn.addEventListener("click", async () => {
                 
-                console.log("click");
                 const {error} = await stripe.confirmPayment({
                     elements,
                     confirmParams: {
@@ -1004,7 +974,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     }).then(res => res.json())
                     .then(price => {
-                        console.log(price);
                         paidEpisodeDivHeaderPrice.innerText = (price.unitAmount / 100) + " " + price.currency;
                     })
 
@@ -1129,7 +1098,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function createButtonEventListener(createAccountDialog, e, firstNameInput, lastNameInput, emailInput, usernameInput, passwordInput) {
 
         e.preventDefault();
-        console.log(firstNameInput + lastNameInput, emailInput, usernameInput, passwordInput)
 
         if(firstNameInput.trim() != "" && lastNameInput.trim() != "" && emailInput.trim() != "" && usernameInput.trim() != "" && passwordInput.trim() != "" && passwordInput.length > 7 && usernameInput.length > 5 && passwordInput.length < 20 && usernameInput.length < 15) {
             await fetch("http://localhost:8080/api/user/create-user-account", {
@@ -1153,7 +1121,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             })
             .then(data => {
                 if (typeof data == 'object') {
-                    console.log(data);
                     createAccountDialog.removeAttribute("open");
                     sessionStorage.setItem("userID", data.userId);
                     loadHomePage();
@@ -1185,7 +1152,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         contentDiv.appendChild(accountPageHeader);
 
         let userId = sessionStorage.getItem("userID");
-        console.log(userId);
                 
         if (userId && userId.trim().length > 0) {
             
@@ -1231,7 +1197,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             })
         }
         logOutLink.addEventListener("click", () => {
-            console.log("clickL");
             sessionStorage.removeItem("userID");
             loadHomePage();
         
@@ -1335,6 +1300,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const purchaseHeader = document.createElement("h2");
                 const purchaseimg = document.createElement("img");
                 const purchasePrice = document.createElement("h4");
+                let productName;
 
                 await fetch("http://localhost:8080/api/customer/stripe/get-single-product", {
                     method: "GET",
@@ -1344,9 +1310,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 }).then(res => res.json())
                 .then(async item => {
-                    console.log(item);
                     purchaseHeader.innerText = item.name;
                     purchaseimg.src = item.images[0];
+                    productName = item.name.substring(0, 9);
                     await fetch("http://localhost:8080/api/customer/stripe/get-product-price", {
                         method: "GET",
                         headers: {
@@ -1370,13 +1336,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }) 
                     .then(res => res.blob())
                     .then(podcasts => {
-                        console.log(podcasts);
                         audio.src = URL.createObjectURL(podcasts);
                         audio.style.maxWidth = "100%";
                         audio.controls = true;
                         audio.style.width = "98%";
                     })
-                purchaseHistory.append(purchaseHeader, purchaseimg, audio, purchasePrice);
+                    
+
+                if (productName == "Podcast #") {
+                    purchaseHistory.append(purchaseHeader, purchaseimg, audio, purchasePrice);
+                    
+                } else {
+                    purchaseHistory.append(purchaseHeader, purchaseimg, purchasePrice);
+                }
             });
         }
 
@@ -1426,7 +1398,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }) 
                     .then(res => res.blob())
                     .then(podcasts => {
-                        console.log(podcasts);
                         const audio = new Audio();
                         audio.src = URL.createObjectURL(podcasts);
                         audio.style.maxWidth = "100%";
@@ -1453,7 +1424,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             cancelSubscriptionBtn.addEventListener("click", () => {
                 
                 cancelDialog.innerHTML = "";
-                console.log("click");
                 window.scrollTo(top);
                 cancelDialog.style.textAlign = "center";
                 const cancelDialogHeader = document.createElement("h2");
@@ -1485,7 +1455,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             })
             
             async function confirmBtnEventListener(password, username) {
-                console.log(username, password)
                 await fetch("http://localhost:8080/api/customer/stripe/cancel-subscription", {
                     method: "PATCH",
                     headers: {
@@ -1495,7 +1464,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 }).then(res => res.text())
                 .then(subscription => {
-                    console.log(subscription);
                     alert(subscription);
                     cancelDialog.removeAttribute("open");
                     loadHomePage();
@@ -1605,7 +1573,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         return res.text();
                     })
                     .then(data => {
-                        console.log(data);
                         sessionStorage.removeItem("userID");
                         confirmationDialog.removeAttribute("open");
                         alert(data);
@@ -1686,7 +1653,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         loadAccountPage(user);
                         
                     }
-                    console.log(user);
                 })
             } else {
                 alert("Your new passwords didn't match!");
@@ -1913,9 +1879,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 errorMessage.innerText = "All fields except 'Address 2' are required, including a valid email address.";
                 loginChoice.appendChild(errorMessage);
             });
-            
-            console.log({clientSecret});
-        
+             
             const elements = stripe.elements({clientSecret});
             paymentElement = elements.create('payment');
             paymentElement.mount('#paymentElement');
@@ -1925,11 +1889,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     await fetch("http://localhost:8080/api/customer/stripe/get-product-price", {
                         method: "GET",
                         headers: {
-                            "priceId": "price_1Or4KYG7YXGZMv5OBkzsK5KY"
+                            "priceId": "price_1Ow1FJG7YXGZMv5Oz9ODeoVK"
                         }
                     }).then(res => res.json())
                     .then(price => {
-                        console.log(price);
                         paidEpisodeDivHeaderPrice.innerText = (price.unitAmount / 100) + " " + price.currency;
                     })
             const payBtn = document.createElement("button");
@@ -1938,7 +1901,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     
             payBtn.addEventListener("click", async () => {
                 
-                console.log("click");
                 const {error} = await stripe.confirmPayment({
                     elements,
                     confirmParams: {
